@@ -15,7 +15,9 @@ int main(int argc, char *argv[])
 
     std::cout << config->to_string() << std::endl;
 
-    Genome *genome = new Genome(1, config);
+    GenomeConfig* genome_config = new GenomeConfig(config);
+
+    Genome *genome = new Genome(1, genome_config);
 
     std::cout << "Genome Size: " << sizeof(*genome) << " Bytes" << std::endl;
 
