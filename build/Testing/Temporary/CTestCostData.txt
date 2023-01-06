@@ -1,5 +1,0 @@
-AttributeTests 20 0.0001506
-ConfigParserTests 20 0.000160037
-NodeGeneTests 20 0.000148404
-ConnectionGeneTests 20 0.000148402
----
