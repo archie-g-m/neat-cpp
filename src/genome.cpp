@@ -15,6 +15,17 @@ GenomeConfig::GenomeConfig(ConfigParser *_config)
 
     std::map<std::string, std::string> GenomeData = _config->data["DefaultGenome"];
 
+    // Distance Parameters
+    this->compatibility_disjoint_coefficient = std::stof(GenomeData["compatibility_disjoint_coefficient"]);
+    this->compatibility_weight_coefficient = std::stof(GenomeData["compatibility_weight_coefficient"]);
+
+    // Mutate Parameters
+    this->conn_add_prob = std::stof(GenomeData["conn_add_prob"]);
+    this->conn_delete_prob = std::stof(GenomeData["conn_delete_prob"]);
+
+    this->node_add_prob = std::stof(GenomeData["node_add_prob"]);
+    this->node_delete_prob = std::stof(GenomeData["node_delete_prob"]);
+
     // Node Parameters
     this->num_hidden = std::stoi(GenomeData["num_hidden"]);
     this->num_inputs = std::stoi(GenomeData["num_inputs"]);
@@ -39,7 +50,15 @@ GenomeConfig::GenomeConfig(ConfigParser *_config)
     this->response_replace_rate = std::stof(GenomeData["response_replace_rate"]);
 
     // Connection Parameters
-    this->initial_condition = GenomeData["initial_condition"];
+    this->initial_connection = GenomeData["initial_connection"];
+
+    this->activation_default = GenomeData["activation_default"];
+    this->activation_mutate_rate = std::stof(GenomeData["activation_mutate_rate"]);
+    this->activation_options = GenomeData["activation_options"];
+
+    this->aggregation_default = GenomeData["aggregation_default"];
+    this->aggregation_mutate_rate = std::stof(GenomeData["aggregation_mutate_rate"]);
+    this->aggregation_options = GenomeData["aggregation_options"];
 
     this->enabled_default = to_bool(GenomeData["enabled_default"]);
     this->enabled_mutate_rate = std::stof(GenomeData["enabled_mutate_rate"]);
@@ -64,7 +83,7 @@ GenomeConfig::GenomeConfig(ConfigParser *_config)
  */
 bool GenomeConfig::to_bool(std::string str)
 {
-    transform(str.begin(), str.end(), str.begin(), ::toupper);
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
     if (str == "true" || str == "1")
     {
         return true;
@@ -120,18 +139,23 @@ Genome::Genome(int _key, GenomeConfig *_genome_config)
         this->hidden_keys.push_back(node_key);
     }
     // Create connections between nodes
-    std::vector<std::pair<int, int>> connections;
-    if (config->initial_condition == "full_direct")
+    std::vector<std::pair<int, int>> connection_list;
+    if (config->initial_connection == "full_direct")
     {
-        connections = generate_full_connections(true);
+        connection_list = generate_full_connections(true);
     }
-    else if (config->initial_condition == "full_indirect")
+    else if (config->initial_connection == "full_indirect")
     {
-        connections = generate_full_connections(false);
+        connection_list = generate_full_connections(false);
     }
     else
     {
         throw(std::invalid_argument("Incorrect initial condition provided"));
+    }
+
+    for (std::pair<int, int> conn_key : connection_list)
+    {
+        connections[conn_key] = new_connection(conn_key);
     }
 }
 
@@ -179,7 +203,7 @@ ConnectionGene *Genome::new_connection(std::pair<int, int> connection_key)
     BoolAttribute *enable = new BoolAttribute(enable_key,
                                               this->config->enabled_mutate_rate);
 
-    std::vector<Attribute*> connection_attributes;
+    std::vector<Attribute *> connection_attributes;
     connection_attributes.push_back(weight);
     connection_attributes.push_back(enable);
 
@@ -201,43 +225,43 @@ ConnectionGene *Genome::new_connection(std::pair<int, int> connection_key)
  */
 std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
 {
-    // TODO This can probably be optimized more  
+    // TODO This can probably be optimized more
     // currently O(inputs*(hidden+outputs) + hidden*outputs)
     std::vector<std::pair<int, int>> connections;
     if (direct || hidden_keys.empty())
     {
-        for (int in_it = 0; in_it < input_keys.size(); in_it++)
+        for (int in_key : input_keys)
         {
             // inputs -> hidden (if possible)
             if (!hidden_keys.empty())
             {
-                for (int hd_it = 0; hd_it < hidden_keys.size(); hd_it++)
+                for (int hd_key : hidden_keys)
                 {
                     std::pair<int, int> conn_key;
-                    conn_key.first = input_keys[in_it];
-                    conn_key.second = hidden_keys[hd_it];
+                    conn_key.first = in_key;
+                    conn_key.second = hd_key;
                     connections.push_back(conn_key);
                 }
             }
             // inputs -> outputs
-            for (int ou_it = 0; ou_it < output_keys.size(); ou_it++)
+            for (int ou_key : output_keys)
             {
                 std::pair<int, int> conn_key;
-                conn_key.first = input_keys[in_it];
-                conn_key.second = output_keys[ou_it];
+                conn_key.first = in_key;
+                conn_key.second = ou_key;
                 connections.push_back(conn_key);
             }
         }
         if (!hidden_keys.empty())
         {
             // hidden -> outputs
-            for (int hd_it = 0; hd_it < hidden_keys.size(); hd_it++)
+            for (int hd_key : hidden_keys)
             {
-                for (int ou_it = 0; ou_it < output_keys.size(); ou_it++)
+                for (int ou_key : output_keys)
                 {
                     std::pair<int, int> conn_key;
-                    conn_key.first = input_keys[hd_it];
-                    conn_key.second = hidden_keys[ou_it];
+                    conn_key.first = hd_key;
+                    conn_key.second = ou_key;
                     connections.push_back(conn_key);
                 }
             }
@@ -246,24 +270,24 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
     else
     {
         // inputs -> outputs
-        for (int in_it = 0; in_it < input_keys.size(); in_it++)
+        for (int in_key : input_keys)
         {
-            for (int ou_it = 0; ou_it < output_keys.size(); ou_it++)
+            for (int ou_key : output_keys)
             {
                 std::pair<int, int> conn_key;
-                conn_key.first = input_keys[in_it];
-                conn_key.second = output_keys[ou_it];
+                conn_key.first = in_key;
+                conn_key.second = ou_key;
                 connections.push_back(conn_key);
             }
         }
         // hidden -> outputs
-        for (int hd_it = 0; hd_it < hidden_keys.size(); hd_it++)
+        for (int hd_key : hidden_keys)
         {
-            for (int ou_it = 0; ou_it < output_keys.size(); ou_it++)
+            for (int ou_key : output_keys)
             {
                 std::pair<int, int> conn_key;
-                conn_key.first = input_keys[hd_it];
-                conn_key.second = hidden_keys[ou_it];
+                conn_key.first = hd_key;
+                conn_key.second = ou_key;
                 connections.push_back(conn_key);
             }
         }

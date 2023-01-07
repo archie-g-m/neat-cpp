@@ -10,6 +10,17 @@
 class GenomeConfig
 {
 public:
+    // Distance Parameters
+    float compatibility_disjoint_coefficient;
+    float compatibility_weight_coefficient;
+
+    // Mutate Parameters
+    float conn_add_prob;
+    float conn_delete_prob;
+
+    float node_add_prob;
+    float node_delete_prob;
+
     // Node Parameters
     int num_inputs;
     int num_outputs;
@@ -34,7 +45,15 @@ public:
     float response_replace_rate;
 
     // Connection Parameters
-    std::string initial_condition;
+    std::string initial_connection;
+
+    std::string activation_default;
+    float activation_mutate_rate;
+    std::string activation_options;
+
+    std::string aggregation_default;
+    float aggregation_mutate_rate;
+    std::string aggregation_options;
 
     bool enabled_default;
     float enabled_mutate_rate;
@@ -49,6 +68,8 @@ public:
     float weight_mutate_power;
     float weight_mutate_rate;
     float weight_replace_rate;
+
+    //Mutation Parameters
 
     GenomeConfig(ConfigParser *_config);
 
@@ -65,7 +86,7 @@ public:
 private:
     GenomeConfig *config;
 
-    std::map<int, ConnectionGene *> connections;
+    std::map<std::pair<int,int>, ConnectionGene *> connections;
     std::map<int, NodeGene *> nodes;
 
     std::vector<int> input_keys;
