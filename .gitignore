@@ -1,4 +1,4 @@
-#C++ ignores
+## C++ ignores
 build/
 .vscode/
 # Prerequisites
@@ -34,7 +34,7 @@ build/
 *.out
 *.app
 
-#CMake ignores
+## CMake ignores
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -46,3 +46,6 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+## Personal Scrip Ignores
+.sh

@@ -83,21 +83,31 @@ public:
     int key;
     float fitness;
 
+
 private:
     GenomeConfig *config;
-
-    std::map<std::pair<int,int>, ConnectionGene *> connections;
-    std::map<int, NodeGene *> nodes;
 
     std::vector<int> input_keys;
     std::vector<int> output_keys;
     std::vector<int> hidden_keys;
+
+    std::map<std::pair<int,int>, ConnectionGene *> connections;
+    std::map<int, NodeGene *> nodes;
+
+    bool activated;
 
     // Create all input node
 
 public:
     // Constructor
     Genome(int _key, GenomeConfig *_genome_config);
+
+    int get_num_inputs();
+    int get_num_outputs();
+    int get_num_hidden();
+    int get_num_connections();
+
+    std::vector<float> forward(std::vector<float> inputs);
 
 private:
     NodeGene *new_node(int node_key);

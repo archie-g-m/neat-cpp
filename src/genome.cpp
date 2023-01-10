@@ -157,10 +157,53 @@ Genome::Genome(int _key, GenomeConfig *_genome_config)
     {
         connections[conn_key] = new_connection(conn_key);
     }
+
+    // has this node been activated (raw nodes and connections turned into feed forward layers)
+    activated = false;
 }
-
-// Create Key that can identify where this attribute is in the network
-
+// Get sizes from key vectors as size can change after initialization from config
+/**
+ * @brief return number of input nodes
+ *
+ * @return int
+ */
+int Genome::get_num_inputs()
+{
+    return input_keys.size();
+}
+/**
+ * @brief return number of output nodes
+ *
+ * @return int
+ */
+int Genome::get_num_outputs()
+{
+    return output_keys.size();
+}
+/**
+ * @brief return number of hidden nodes
+ *
+ * @return int
+ */
+int Genome::get_num_hidden()
+{
+    return hidden_keys.size();
+}
+/**
+ * @brief return number of connections
+ *
+ * @return int
+ */
+int Genome::get_num_connections()
+{
+    return connections.size();
+}
+/**
+ * @brief Generate a new node from the config with the provided node_key
+ *
+ * @param node_key
+ * @return NodeGene*
+ */
 NodeGene *Genome::new_node(int node_key)
 {
     // std::string bias_key = "gene" + std::to_string(this->key) + "_node" + std::to_string(node_key) + "_bias";
@@ -293,4 +336,11 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
         }
     }
     return connections;
+}
+
+std::vector<float> Genome::forward(std::vector<float> inputs){
+    assert(this->activated);
+
+    std::map<int, float> input_values;
+    
 }

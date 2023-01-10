@@ -14,7 +14,7 @@ TEST(GENOMECONFIG, MissingFieldTest){
 }
 
 TEST(GENOMECONFIG, CorrectConversionTest){
-    ConfigParser* config = new ConfigParser("ValidConfig.cfg");
+    ConfigParser* config = new ConfigParser("ValidConfigDirect.cfg");
     GenomeConfig* genome_config = new GenomeConfig(config);
 
     ASSERT_EQ(genome_config->activation_default, "relu");
@@ -50,8 +50,8 @@ TEST(GENOMECONFIG, CorrectConversionTest){
     ASSERT_FLOAT_EQ(genome_config->node_add_prob, 0.2);
     ASSERT_FLOAT_EQ(genome_config->node_delete_prob, 0.2);
 
-    ASSERT_EQ(genome_config->num_hidden, 0);
-    ASSERT_EQ(genome_config->num_inputs, 1024);
+    ASSERT_EQ(genome_config->num_hidden, 10);
+    ASSERT_EQ(genome_config->num_inputs, 2);
     ASSERT_EQ(genome_config->num_outputs, 4);
 
     ASSERT_FLOAT_EQ(genome_config->response_init_mean, 1.0);
