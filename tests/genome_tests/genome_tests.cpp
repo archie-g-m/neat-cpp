@@ -25,7 +25,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
     ConfigParser *config = new ConfigParser("ValidConfigIndirect.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
-    Genome *genome = new Genome(1, genome_config);
+    Genome *genome = new Genome(2, genome_config);
 
     // Make sure correct number of nodes were made
     ASSERT_EQ(genome->get_num_inputs(), 2);
@@ -42,7 +42,7 @@ TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
     ConfigParser *config = new ConfigParser("ValidConfigDirectNoHidden.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
-    Genome *genome = new Genome(1, genome_config);
+    Genome *genome = new Genome(3, genome_config);
 
     // Make sure correct number of nodes were made
     ASSERT_EQ(genome->get_num_inputs(), 2);
@@ -59,7 +59,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
     ConfigParser *config = new ConfigParser("ValidConfigIndirectNoHidden.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
-    Genome *genome = new Genome(1, genome_config);
+    Genome *genome = new Genome(4, genome_config);
 
     // Make sure correct number of nodes were made
     ASSERT_EQ(genome->get_num_inputs(), 2);

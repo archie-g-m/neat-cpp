@@ -337,10 +337,26 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
     }
     return connections;
 }
-
+/**
+ * @brief mutates the genome according to the configuration
+ */
+void mutate(){
+    return;
+}
+/**
+ * @brief activates this network to be efficiently computed in the forward function
+ * 
+ */
+void activate(){
+    return;
+}
 std::vector<float> Genome::forward(std::vector<float> inputs){
     assert(this->activated);
 
     std::map<int, float> input_values;
-    
+
+    for(int node_key : this->forward_order){
+        continue;
+    }
+
 }

@@ -94,6 +94,8 @@ private:
     std::map<std::pair<int,int>, ConnectionGene *> connections;
     std::map<int, NodeGene *> nodes;
 
+    std::vector<int> forward_order;
+
     bool activated;
 
     // Create all input node
