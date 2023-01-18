@@ -2,7 +2,13 @@
 
 #include <map>
 #include <string>
+#include <sstream>
+#include <iostream>
+#include <vector>
+#include <set>
 #include "genes.h"
+#include "aggregations.h"
+#include "activations.h"
 #include "config_parser.h"
 
 GenomeConfig::GenomeConfig(ConfigParser *_config)
@@ -54,11 +60,11 @@ GenomeConfig::GenomeConfig(ConfigParser *_config)
 
     this->activation_default = GenomeData["activation_default"];
     this->activation_mutate_rate = std::stof(GenomeData["activation_mutate_rate"]);
-    this->activation_options = GenomeData["activation_options"];
+    this->activation_options = split_string(GenomeData["activation_options"]);
 
     this->aggregation_default = GenomeData["aggregation_default"];
     this->aggregation_mutate_rate = std::stof(GenomeData["aggregation_mutate_rate"]);
-    this->aggregation_options = GenomeData["aggregation_options"];
+    this->aggregation_options = split_string(GenomeData["aggregation_options"]);
 
     this->enabled_default = to_bool(GenomeData["enabled_default"]);
     this->enabled_mutate_rate = std::stof(GenomeData["enabled_mutate_rate"]);
@@ -97,6 +103,30 @@ bool GenomeConfig::to_bool(std::string str)
         throw std::invalid_argument("Invalid argument '" + str + "' provided to Genome::to_bool");
     }
 }
+/**
+ * @brief splits the input string based on commas
+ *
+ * @param str
+ * @return std::set<std::string>
+ */
+std::set<std::string> GenomeConfig::split_string(std::string str)
+{
+    std::set<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+    while (std::getline(ss, item, ','))
+    {
+        // Trim leading and trailing whitespace
+        item.erase(item.begin(), std::find_if(item.begin(), item.end(), [](int ch)
+                                              { return !std::isspace(ch); }));
+        item.erase(std::find_if(item.rbegin(), item.rend(), [](int ch)
+                                { return !std::isspace(ch); })
+                       .base(),
+                   item.end());
+        result.insert(item);
+    }
+    return result;
+}
 
 Genome::Genome(int _key, GenomeConfig *_genome_config)
 {
@@ -109,14 +139,14 @@ Genome::Genome(int _key, GenomeConfig *_genome_config)
     this->config = _genome_config;
 
     // Create all input nodes
-    for (int in_node = 0; in_node < config->num_inputs; in_node++)
+    for (int in_node = 1; in_node <= config->num_inputs; in_node++)
     {
-        // All input nodes have negative values
+        // All input nodes have negative values starting at -1
         int node_key = -1 * in_node;
         // Create New Node
         this->nodes[node_key] = new_node(node_key);
         // Add key to list of output keys
-        this->input_keys.push_back(node_key);
+        this->input_keys.insert(node_key);
     }
     // Create all output nodes
     for (int out_node = 0; out_node < config->num_outputs; out_node++)
@@ -126,7 +156,7 @@ Genome::Genome(int _key, GenomeConfig *_genome_config)
         // Create New Node
         this->nodes[node_key] = new_node(node_key);
         // Add key to list of output keys
-        this->output_keys.push_back(node_key);
+        this->output_keys.insert(node_key);
     }
     // Create all hidden nodes
     for (int hid_node = 0; hid_node < config->num_hidden; hid_node++)
@@ -136,7 +166,7 @@ Genome::Genome(int _key, GenomeConfig *_genome_config)
         // Create New Node
         this->nodes[node_key] = new_node(node_key);
         // Add key to list of hidden keys
-        this->hidden_keys.push_back(node_key);
+        this->hidden_keys.insert(node_key);
     }
     // Create connections between nodes
     std::vector<std::pair<int, int>> connection_list;
@@ -199,6 +229,15 @@ int Genome::get_num_connections()
     return connections.size();
 }
 /**
+ * @brief gets total number of nodes in network
+ *
+ * @return int
+ */
+int Genome::get_num_nodes()
+{
+    return nodes.size();
+}
+/**
  * @brief Generate a new node from the config with the provided node_key
  *
  * @param node_key
@@ -221,9 +260,19 @@ NodeGene *Genome::new_node(int node_key)
                                                   this->config->response_mutate_power,
                                                   this->config->response_min_value,
                                                   this->config->response_max_value);
+    std::string activation_key = "activation";
+    StringAttribute *activation = new StringAttribute(activation_key,
+                                                      this->config->activation_mutate_rate,
+                                                      this->config->activation_options);
+    std::string aggregation_key = "aggregation";
+    StringAttribute *aggregation = new StringAttribute(aggregation_key,
+                                                       this->config->aggregation_mutate_rate,
+                                                       this->config->aggregation_options);
     std::vector<Attribute *> node_attributes;
     node_attributes.push_back(bias);
     node_attributes.push_back(response);
+    node_attributes.push_back(activation);
+    node_attributes.push_back(aggregation);
     NodeGene *node = new NodeGene(node_key, node_attributes);
     return node;
 }
@@ -338,25 +387,167 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
     return connections;
 }
 /**
+ * @brief finds the inputs to each node in the network
+ * Computes in linear time O(N) (O(num_nodes) + O(num_connections))
+ *
+ * @return std::map<int, std::vector<int>*>
+ */
+void Genome::generate_node_inputs()
+{
+    node_inputs.clear();
+    // add all node keys to input map
+    for (std::map<int, NodeGene *>::iterator node_it = nodes.begin(); node_it != nodes.end(); node_it++)
+    {
+        node_inputs.insert(std::pair<int, std::set<int> *>(node_it->first, new std::set<int>()));
+    }
+
+    // iterate through all connections and add the input to the list of the output's inputs
+    for (std::map<std::pair<int, int>, ConnectionGene *>::iterator conn_it = connections.begin(); conn_it != connections.end(); conn_it++)
+    {
+        // if Connection is enabled then add the input to the list of output's inputs
+        if (conn_it->second->get_attribute("enable")->get_bool_value())
+        {
+            int out = conn_it->first.second; // key
+            int in = conn_it->first.first;   // value
+            node_inputs[out]->insert(in);
+        }
+    }
+}
+/**
  * @brief mutates the genome according to the configuration
  */
-void mutate(){
-    return;
+void Genome::mutate()
+{
+    // maybe remove the activated assertion and just activate network every mutation
+    this->activated = false;
 }
 /**
  * @brief activates this network to be efficiently computed in the forward function
- * 
  */
-void activate(){
-    return;
+void Genome::activate()
+{
+    std::set<int> added_keys;
+    // empty the cached forward order
+    this->forward_order.clear();
+    // recalculate the inputs to each node
+    generate_node_inputs();
+    // inputs dont have any dependent nodes so add them first
+    for (int in_key : this->input_keys)
+    {
+        this->forward_order.push_back(in_key);
+        added_keys.insert(in_key);
+    }
+    // work through hidden nodes to find which ones depend on eachother
+    std::set<int> hidden_key_copy(this->hidden_keys);
+    std::set<int>::iterator key_ptr = hidden_key_copy.begin();
+    while (!hidden_key_copy.empty())
+    {
+        bool add_node = true;
+        // if one of this nodes inputs is not in the current forward order then skip it for now
+        for (int input : *this->node_inputs[*key_ptr])
+        {
+            if (added_keys.count(input) == 0)
+            {
+                add_node = false;
+                break;
+            }
+        }
+
+
+        if (add_node)
+        {
+            this->forward_order.push_back(*key_ptr);
+            added_keys.insert(*key_ptr);
+            int complete_key = *key_ptr;
+             // Continuously loop thorugh hidden keys until theyre done
+            if (key_ptr == hidden_key_copy.end())
+            {
+                key_ptr = hidden_key_copy.begin();
+            }
+            else
+            {
+                ++key_ptr;
+            }
+            hidden_key_copy.erase(complete_key);
+        }
+        else
+        {
+            // Continuously loop thorugh hidden keys until theyre done
+            if (key_ptr == hidden_key_copy.end())
+            {
+                key_ptr = hidden_key_copy.begin();
+            }
+            else
+            {
+                ++key_ptr;
+            }
+        }
+
+
+       
+    }
+    // outputs dont depend on eachother so you can just add them all last
+    for (int out_key : this->output_keys)
+    {
+        this->forward_order.push_back(out_key);
+    }
+    this->activated = true;
 }
-std::vector<float> Genome::forward(std::vector<float> inputs){
+/**
+ * @brief computes the result of providing the given inputs to the network
+ *
+ * @param inputs
+ * @return std::vector<float>
+ */
+std::vector<float> Genome::forward(std::vector<float> inputs)
+{
     assert(this->activated);
 
-    std::map<int, float> input_values;
 
-    for(int node_key : this->forward_order){
-        continue;
+    if (inputs.size() != this->input_keys.size())
+    {
+        throw std::invalid_argument("Incorrect number of keys provided, given: " +
+                                    std::to_string(this->input_keys.size()) +
+                                    ", need: " +
+                                    std::to_string(inputs.size()));
     }
 
+    std::map<int, float> input_values;
+    std::set<int> *node_inputs;
+    float node_value;
+    for (int node_key : this->forward_order)
+    {
+        NodeGene *this_node = this->nodes[node_key];
+        float bias = this_node->get_attribute("bias")->get_float_value();
+        float response = this_node->get_attribute("response")->get_float_value();
+        std::string activation_method = this_node->get_attribute("activation")->get_string_value();
+        std::string aggregation_method = this_node->get_attribute("aggregation")->get_string_value();
+        // If this node is an input pull it's value from the inputs
+        std::set<int>::iterator input_ind = this->input_keys.find(node_key);
+        if (input_ind != this->input_keys.end())
+        {
+            node_value = inputs[std::distance(input_keys.begin(), input_ind)];
+        }
+        // If this node is not an input, aggregate the node's inputs to be the value
+        else
+        {
+            node_inputs = this->node_inputs[node_key];
+            std::vector<float> input_values;
+            for (int node_input_id : *node_inputs){
+                input_values.push_back(input_values[node_input_id]);
+            }
+            node_value = aggregate_vector(input_values, aggregation_method);
+        }
+        // Apply activation function to the value
+        node_value = activate_value((bias+(response*node_value)), activation_method);
+        input_values[node_key] = node_value;
+    }
+
+    std::vector<float> outputs;
+
+    for (int out_key : output_keys){
+        outputs.push_back(input_values[out_key]);
+    }
+
+    return outputs;
 }

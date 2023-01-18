@@ -3,12 +3,14 @@
 
 #include <string>
 #include <random>
+#include <set>
 
 enum valid_types
 {
     float_attribute,
     int_attribute,
-    bool_attribute
+    bool_attribute,
+    string_attribute
 };
 
 static bool rand_bool(float cutoff) { return ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) < cutoff); };
@@ -24,6 +26,7 @@ public:
     // Getters
     virtual float get_float_value() = 0;
     virtual bool get_bool_value() = 0;
+    virtual std::string get_string_value() = 0;
 
     // Other Methods
     virtual Attribute *copy() = 0;
@@ -42,7 +45,6 @@ private:
 
 public:
     // Constructors
-    BoolAttribute();
     BoolAttribute(std::string _name, float _mutate_rate);
 
     // Getters
@@ -52,6 +54,7 @@ public:
 
     // Other Methods
     BoolAttribute *copy();
+    std::string get_string_value();
     void mutate_value();
     std::string to_string();
     bool validate();
@@ -72,12 +75,12 @@ private:
 
 public:
     // Constructors
-    IntAttribute();
     IntAttribute(std::string _name, float _mutate_rate, float _mutate_power, int _min_value, int _max_value);
 
     // Getters
     float get_float_value();
     bool get_bool_value();
+    std::string get_string_value();
     float get_mutate_rate();
     float get_mutate_power();
     int get_min_value();
@@ -105,12 +108,12 @@ private:
 
 public:
     // Constructors
-    FloatAttribute();
     FloatAttribute(std::string _name, float _mutate_rate, float _mutate_power, float _min_value, float _max_value);
 
     // Getters
     float get_float_value();
     bool get_bool_value();
+    std::string get_string_value();
     float get_mutate_rate();
     float get_mutate_power();
     float get_min_value();
@@ -123,4 +126,31 @@ public:
     bool validate();
 };
 
+class StringAttribute : public Attribute
+{
+public:
+    std::string value;
+
+private:
+    float mutate_rate;
+    std::set<std::string> options;
+    std::uniform_int_distribution<int> distribution;
+    std::default_random_engine generator;
+
+public:
+    StringAttribute(std::string _name, float _mutate_rate,  std::set<std::string> _options);
+    float get_float_value();
+    bool get_bool_value();
+    std::string get_string_value();
+    float get_mutate_rate();
+    std::set<std::string> get_options();
+
+    StringAttribute *copy();
+    void mutate_value();
+    std::string to_string();
+    bool validate();
+    
+private:
+    std::string random_option();
+};
 #endif // ATTRIBUTES_H

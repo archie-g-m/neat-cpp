@@ -1,5 +1,7 @@
 set(SOURCES
 main.cpp
+activations.cpp
+aggregations.cpp
 attributes.cpp
 genes.cpp
 genome.cpp

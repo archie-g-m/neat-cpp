@@ -10,19 +10,6 @@
 /**
  * @brief Construct a new Bool Attribute:: Bool Attribute object
  *
- */
-BoolAttribute::BoolAttribute()
-{
-    name = "";
-    mutate_rate = 0;
-
-    this->validate();
-
-    value = true;
-}
-/**
- * @brief Construct a new Bool Attribute:: Bool Attribute object
- *
  * @param _name name of the Attribute
  * @param _mutate_rate probability of mutating the value
  */
@@ -50,6 +37,12 @@ float BoolAttribute::get_float_value() { return value ? 1.F : 0.F; }
  * @return false
  */
 bool BoolAttribute::get_bool_value() { return value; }
+/**
+ * @brief Gets String Equivalent of Attribute's Value
+ *
+ * @return std::string
+ */
+std::string BoolAttribute::get_string_value() { return value ? "true" : "false"; }
 /**
  * @brief Gets Mutate Rate of Attribute
  *
@@ -98,28 +91,20 @@ std::string BoolAttribute::to_string()
  */
 bool BoolAttribute::validate()
 {
+    if (this->mutate_rate < 0)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(this->mutate_rate) + ") must be greater than 0"));
+    }
+    else if (this->mutate_rate > 1.0F)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(this->mutate_rate) + ") must be less than 1"));
+    }
     return true;
 }
 
 /// ------------ IntAttribute Definitions ------------///
 
 // Constructors
-/**
- * @brief Construct a new Int Attribute:: Int Attribute object
- *
- */
-IntAttribute::IntAttribute()
-{
-    name = "";
-    mutate_rate = 0.F;
-    mutate_power = 0.F;
-    min_value = 0;
-    max_value = 1;
-
-    this->validate();
-
-    value = 0;
-}
 /**
  * @brief Construct a new Int Attribute:: Int Attribute object
  *
@@ -158,6 +143,12 @@ float IntAttribute::get_float_value() { return static_cast<float>(value); }
  * @return false
  */
 bool IntAttribute::get_bool_value() { return (value == 0) ? false : true; }
+/**
+ * @brief Gets String Equivalent of Attribute's Value
+ *
+ * @return std::string
+ */
+std::string IntAttribute::get_string_value() { return std::to_string(value); }
 /**
  * @brief Gets Mutate Rate
  *
@@ -238,26 +229,25 @@ bool IntAttribute::validate()
     {
         throw(std::invalid_argument("Min Value: " + std::to_string(min_value) + " must be less than Max Value: " + std::to_string(max_value)));
     }
+    if (mutate_rate < 0)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(this->mutate_rate) + ") must be greater than 0"));
+    }
+    else if (mutate_rate > 1.0F)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(this->mutate_rate) + ") must be less than 1"));
+    }
+    if (mutate_power < 0)
+    {
+        throw(std::invalid_argument("Mutate Power (" + std::to_string(this->mutate_rate) + ") must be greater than 0"));
+    }
+    
     return true;
 }
 
 /// ------------ FloatAttribute Definitions ------------///
 
 // Constructors
-/**
- * @brief Construct a new Float Attribute:: Float Attribute object
- *
- */
-FloatAttribute::FloatAttribute()
-{
-    name = "";
-    mutate_rate = 0.F;
-    mutate_power = 0.F;
-    min_value = 0.F;
-    max_value = 1.F;
-    this->validate();
-    value = 0.F;
-}
 /**
  * @brief Construct a new Int Attribute:: Int Attribute object
  *
@@ -296,6 +286,12 @@ float FloatAttribute::get_float_value() { return value; }
  * @return false
  */
 bool FloatAttribute::get_bool_value() { return (value == 0) ? false : true; }
+/**
+ * @brief Gets String Equivalent of Attribute's Value
+ *
+ * @return std::string
+ */
+std::string FloatAttribute::get_string_value() { return std::to_string(value); }
 /**
  * @brief Gets Mutate Rate
  *
@@ -375,6 +371,113 @@ bool FloatAttribute::validate()
     if (min_value > max_value)
     {
         throw(std::invalid_argument("Min Value: " + std::to_string(min_value) + " must be less than Max Value: " + std::to_string(max_value)));
+    }
+    if (mutate_rate < 0)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(mutate_rate) + ") must be greater than 0"));
+    }
+    else if (mutate_rate > 1.0F)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(mutate_rate) + ") must be less than 1"));
+    }
+    if (mutate_power < 0)
+    {
+        throw(std::invalid_argument("Mutate Power (" + std::to_string(mutate_rate) + ") must be greater than 0"));
+    }
+    return true;
+}
+
+StringAttribute::StringAttribute(std::string _name, float _mutate_rate, std::set<std::string> _options)
+{
+    name = _name;
+    mutate_rate = _mutate_rate;
+    options = _options;
+    distribution = std::uniform_int_distribution<int>(0, options.size() - 1);
+    generator = std::default_random_engine();
+
+    this->validate();
+
+    value = random_option();
+}
+
+std::string StringAttribute::random_option()
+{
+    std::set<std::string>::iterator it = options.begin();
+    std::advance(it, distribution(generator));
+    return *it;
+}
+float StringAttribute::get_float_value()
+{
+    float fl;
+    try{
+        fl = std::stof(value);
+    } catch(std::invalid_argument){
+        fl = 0;
+    }
+    return fl;
+}
+bool StringAttribute::get_bool_value()
+{
+    return value != "";
+}
+std::string StringAttribute::get_string_value()
+{
+    return value;
+}
+float StringAttribute::get_mutate_rate()
+{
+    return mutate_rate;
+}
+std::set<std::string> StringAttribute::get_options()
+{
+    return options;
+}
+
+StringAttribute *StringAttribute::copy()
+{
+    StringAttribute *ret_attr = new StringAttribute(name,
+                                                    mutate_rate,
+                                                    options);
+
+    ret_attr->value = this->value;
+
+    return ret_attr;
+}
+void StringAttribute::mutate_value()
+{
+    if (rand_bool(mutate_rate))
+    {
+        value = random_option();
+    }
+}
+std::string StringAttribute::to_string()
+{
+    std::string ret_str = "String Attribute: '" + name + "' with value '" + value +
+                          "' (mr: " + std::to_string(mutate_rate) +
+                          ", options: [";
+    for (std::string op : options)
+    {
+        ret_str += (op + ", ");
+    }
+    ret_str += "])";
+
+    return ret_str;
+}
+
+bool StringAttribute::validate()
+{
+    if (mutate_rate < 0)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(mutate_rate) + ") must be greater than 0"));
+    }
+    else if (mutate_rate > 1.0F)
+    {
+        throw(std::invalid_argument("Mutate Rate (" + std::to_string(mutate_rate) + ") must be less than 1"));
+    }
+
+    if (options.size() <= 0)
+    {
+        throw(std::invalid_argument("You must provide at least 1 option to a StringAttribute"));
     }
     return true;
 }

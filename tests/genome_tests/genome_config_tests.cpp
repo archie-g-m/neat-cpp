@@ -19,11 +19,15 @@ TEST(GENOMECONFIG, CorrectConversionTest){
 
     ASSERT_EQ(genome_config->activation_default, "relu");
     ASSERT_FLOAT_EQ(genome_config->activation_mutate_rate, 1.0);
-    ASSERT_EQ(genome_config->activation_options, "relu");
+    std::set<std::string> act_opt;
+    act_opt.insert("relu");
+    ASSERT_EQ(genome_config->activation_options, act_opt);
 
     ASSERT_EQ(genome_config->aggregation_default, "sum");
     ASSERT_FLOAT_EQ(genome_config->aggregation_mutate_rate, 0.0);
-    ASSERT_EQ(genome_config->aggregation_options, "sum");
+    std::set<std::string> agg_opt;
+    agg_opt.insert("sum");
+    ASSERT_EQ(genome_config->aggregation_options, agg_opt);
 
     ASSERT_FLOAT_EQ(genome_config->bias_init_mean, 3.0);
     ASSERT_FLOAT_EQ(genome_config->bias_init_stdev, 1.0);

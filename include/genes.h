@@ -14,7 +14,7 @@ public:
 
     // Member Function Declaration
     bool has_attribute(std::string _key);
-    Attribute* get_attribute(std::string _key);
+    Attribute *get_attribute(std::string _key);
     void mutate();
     std::string to_string();
 
@@ -22,6 +22,13 @@ protected:
     bool verify_ind_attribute(std::string _key, std::string _type);
     bool verify_ind_attribute(std::string _key, std::vector<std::string> _types);
     virtual void verify_attributes() = 0;
+
+    std::map<std::string, valid_types> type_map = {
+        {"FloatAttribute", float_attribute},
+        {"IntAttribute",  int_attribute},
+        {"BoolAttribute",  bool_attribute},
+        {"StringAttribute", string_attribute}
+    };
 };
 
 class NodeGene : public Gene
@@ -43,7 +50,7 @@ class ConnectionGene : public Gene
 {
 public:
     std::pair<int, int> key;
-    bool operator<(const ConnectionGene *other) {return std::abs(this->key.first + this->key.second) < std::abs(other->key.first + other->key.second); }
+    bool operator<(const ConnectionGene *other) { return std::abs(this->key.first + this->key.second) < std::abs(other->key.first + other->key.second); }
     ConnectionGene(std::pair<int, int> _key, std::vector<Attribute *> _attributes);
     float distance(ConnectionGene *other);
     ConnectionGene *copy();

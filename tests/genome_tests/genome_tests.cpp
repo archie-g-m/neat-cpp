@@ -14,6 +14,7 @@ TEST(GENOMETEST, ConstructionTestFullDirect)
     ASSERT_EQ(genome->get_num_inputs(), 2);
     ASSERT_EQ(genome->get_num_outputs(), 4);
     ASSERT_EQ(genome->get_num_hidden(), 10);
+    ASSERT_EQ(genome->get_num_nodes(), 16);
 
     // Make sure correct number of connections were made
     int calc_num_nodes = (2 * (4 + 10)) + (4 * 10);
@@ -31,6 +32,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
     ASSERT_EQ(genome->get_num_inputs(), 2);
     ASSERT_EQ(genome->get_num_outputs(), 4);
     ASSERT_EQ(genome->get_num_hidden(), 10);
+    ASSERT_EQ(genome->get_num_nodes(), 16);
 
     // Make sure correct number of connections were made
     int calc_num_nodes = (2 * 4) + (4 * 10);
@@ -48,6 +50,8 @@ TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
     ASSERT_EQ(genome->get_num_inputs(), 2);
     ASSERT_EQ(genome->get_num_outputs(), 4);
     ASSERT_EQ(genome->get_num_hidden(), 0);
+    ASSERT_EQ(genome->get_num_nodes(), 6);
+
 
     // Make sure correct number of connections were made
     int calc_num_nodes = 2 * 4;
@@ -65,11 +69,13 @@ TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
     ASSERT_EQ(genome->get_num_inputs(), 2);
     ASSERT_EQ(genome->get_num_outputs(), 4);
     ASSERT_EQ(genome->get_num_hidden(), 0);
+    ASSERT_EQ(genome->get_num_nodes(), 6);
 
     // Make sure correct number of connections were made
     int calc_num_nodes = 2 * 4;
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
+
 
 int main(int argc, char **argv)
 {

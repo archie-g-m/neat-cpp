@@ -5,7 +5,9 @@ genome_config_tests.cpp
 ${PROJECT_SOURCE_DIR}/src/genome.cpp
 ${PROJECT_SOURCE_DIR}/src/config_parser.cpp
 ${PROJECT_SOURCE_DIR}/src/genes.cpp
-${PROJECT_SOURCE_DIR}/src/attributes.cpp)
+${PROJECT_SOURCE_DIR}/src/attributes.cpp
+${PROJECT_SOURCE_DIR}/src/activations.cpp
+${PROJECT_SOURCE_DIR}/src/aggregations.cpp)
 
 add_executable(genome_config_tests ${GENOMECONFIG_TEST})
 target_link_libraries(genome_config_tests gtest)
@@ -18,7 +20,9 @@ genome_tests.cpp
 ${PROJECT_SOURCE_DIR}/src/genome.cpp
 ${PROJECT_SOURCE_DIR}/src/config_parser.cpp
 ${PROJECT_SOURCE_DIR}/src/genes.cpp
-${PROJECT_SOURCE_DIR}/src/attributes.cpp)
+${PROJECT_SOURCE_DIR}/src/attributes.cpp
+${PROJECT_SOURCE_DIR}/src/activations.cpp
+${PROJECT_SOURCE_DIR}/src/aggregations.cpp)
 
 add_executable(genome_tests ${GENOME_TEST})
 target_link_libraries(genome_tests gtest)

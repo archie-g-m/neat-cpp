@@ -19,6 +19,11 @@ int main(int argc, char *argv[])
 
     Genome *genome = new Genome(1, genome_config);
 
+    genome->activate();
+    std::vector<float> test_in ;
+    for(int i=1; i<=genome_config->num_inputs; i++){test_in.push_back((float)i);}
+    genome->forward(test_in);
+
     std::cout << "Genome Size: " << sizeof(*genome) << " Bytes" << std::endl;
 
     return 0;

@@ -44,10 +44,6 @@ bool Gene::verify_ind_attribute(std::string _key, std::string _type)
         std::invalid_argument("Attributes must contain a '" + _key + "' Attribute");
     }
 
-    static std::map<std::string, valid_types> type_map;
-    type_map["FloatAttribute"] = float_attribute;
-    type_map["IntAttribute"] = int_attribute;
-    type_map["BoolAttribute"] = bool_attribute;
     switch (type_map[_type])
     {
     case float_attribute:
@@ -64,6 +60,12 @@ bool Gene::verify_ind_attribute(std::string _key, std::string _type)
         break;
     case bool_attribute:
         if (dynamic_cast<BoolAttribute *>(attributes[_key]) == nullptr)
+        {
+            throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
+        }
+        break;
+    case string_attribute:
+        if (dynamic_cast<StringAttribute *>(attributes[_key]) == nullptr)
         {
             throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
         }
@@ -89,11 +91,6 @@ bool Gene::verify_ind_attribute(std::string _key, std::vector<std::string> _type
         throw(std::invalid_argument("Attributes must contain a '" + _key + "' Attribute"));
     }
 
-    static std::map<std::string, valid_types> type_map;
-    type_map["FloatAttribute"] = float_attribute;
-    type_map["IntAttribute"] = int_attribute;
-    type_map["BoolAttribute"] = bool_attribute;
-
     bool correct_type = false;
     for (int i = 0; i < _types.size(); i++)
     {
@@ -114,6 +111,12 @@ bool Gene::verify_ind_attribute(std::string _key, std::vector<std::string> _type
             break;
         case bool_attribute:
             if (dynamic_cast<BoolAttribute *>(attributes[_key]) != nullptr)
+            {
+                correct_type = true;
+            }
+            break;
+        case string_attribute:
+            if (dynamic_cast<StringAttribute *>(attributes[_key]) != nullptr)
             {
                 correct_type = true;
             }
@@ -188,11 +191,18 @@ float NodeGene::distance(NodeGene *other)
     // Get Values of Each Attribute
     float bias = this->attributes["bias"]->get_float_value();
     float response = this->attributes["response"]->get_float_value();
+    std::string activation = this->attributes["activation"]->get_string_value();
+    std::string aggregation = this->attributes["aggregation"]->get_string_value();
+
     float bias_other = other->attributes["bias"]->get_float_value();
     float response_other = other->attributes["response"]->get_float_value();
+    std::string activation_other = other->attributes["activation"]->get_string_value();
+    std::string aggregation_other = other->attributes["aggregation"]->get_string_value();
 
     // Calculate Distance between the
     float dist = std::abs(bias - bias_other) + std::abs(response - response_other);
+    dist += (activation == activation_other ? 0 : 1);
+    dist += (aggregation == aggregation_other ? 0 : 1);
     return dist;
 }
 /**
@@ -278,6 +288,16 @@ void NodeGene::verify_attributes()
     resp_types.push_back("FloatAttribute");
     resp_types.push_back("IntAttribute");
     verify_ind_attribute("response", resp_types);
+
+    // Check whether StringAttribute 'Activation' is in Gene
+    std::vector<std::string> act_types;
+    act_types.push_back("StringAttribute");
+    verify_ind_attribute("activation", act_types);
+
+    // Check whether StringAttribute 'Aggregation' is in Gene
+    std::vector<std::string> agg_types;
+    act_types.push_back("StringAttribute");
+    verify_ind_attribute("aggregation", agg_types);
 
     for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
