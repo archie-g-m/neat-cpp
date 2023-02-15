@@ -117,6 +117,11 @@ private:
     ConnectionGene *new_connection(std::pair<int, int> connection_key);
     std::vector<std::pair<int, int>> generate_full_connections(bool direct);
     void generate_node_inputs();
+    void mutate_add_node();
+    void mutate_delete_node();
+    void mutate_add_conn();
+    void mutate_delete_conn();
+    bool creates_cycle(std::pair<int,int> conn);
 };
 
 

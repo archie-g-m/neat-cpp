@@ -1,0 +1,7 @@
+Flow:
+Create Population from config
+which creates many genomes within the population
+then you evaluate each genome upon the Gym environment
+to evaluate each genome you first convert the nodes and connections to a network that can take the inputs through each connection to an output. 
+(this should also prune the unnecessary connections and nodes from the network before evaluating)
+then this output should be passed thorugh an activation function to convert the values of the output nodes to an action from the Gym Environment

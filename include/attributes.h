@@ -27,34 +27,36 @@ public:
     virtual float get_float_value() = 0;
     virtual bool get_bool_value() = 0;
     virtual std::string get_string_value() = 0;
+    virtual float get_mutate_rate() = 0;
+
 
     // Other Methods
     virtual Attribute *copy() = 0;
     virtual void mutate_value() = 0;
     virtual std::string to_string() = 0;
     virtual bool validate() = 0;
+protected:
+    float mutate_rate;
 };
 
 class BoolAttribute : public Attribute
 {
-public:
+public:    
     bool value;
-
-private:
-    float mutate_rate;
 
 public:
     // Constructors
     BoolAttribute(std::string _name, float _mutate_rate);
+    BoolAttribute(std::string _name, bool _default_value, float _mutate_rate);
 
     // Getters
     float get_float_value();
     bool get_bool_value();
+    std::string get_string_value();
     float get_mutate_rate();
 
     // Other Methods
     BoolAttribute *copy();
-    std::string get_string_value();
     void mutate_value();
     std::string to_string();
     bool validate();
@@ -66,7 +68,6 @@ public:
     int value;
 
 private:
-    float mutate_rate;
     float mutate_power;
     int min_value;
     int max_value;
@@ -99,7 +100,6 @@ public:
     float value;
 
 private:
-    float mutate_rate;
     float mutate_power;
     float min_value;
     float max_value;
@@ -132,7 +132,6 @@ public:
     std::string value;
 
 private:
-    float mutate_rate;
     std::set<std::string> options;
     std::uniform_int_distribution<int> distribution;
     std::default_random_engine generator;

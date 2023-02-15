@@ -18,11 +18,19 @@ int main(int argc, char *argv[])
     GenomeConfig* genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(1, genome_config);
-
+    std::cout << "Activating Network" << std::endl;
     genome->activate();
+    std::cout << "Running Forward Computation on Network" << std::endl;
     std::vector<float> test_in ;
     for(int i=1; i<=genome_config->num_inputs; i++){test_in.push_back((float)i);}
-    genome->forward(test_in);
+    std::vector<float> out = genome->forward(test_in);
+    std::cout <<"Output [";
+    for(float o : out){
+        std::cout << o << ", ";
+    }
+    std::cout << "]" << std::endl;
+
+
 
     std::cout << "Genome Size: " << sizeof(*genome) << " Bytes" << std::endl;
 

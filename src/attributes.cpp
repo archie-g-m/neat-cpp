@@ -22,6 +22,22 @@ BoolAttribute::BoolAttribute(std::string _name, float _mutate_rate)
 
     value = rand_bool(0.5);
 }
+/**
+ * @brief Construct a new Bool Attribute:: Bool Attribute object
+ * 
+ * @param _name 
+ * @param _default_value 
+ * @param _mutate_rate 
+ */
+BoolAttribute::BoolAttribute(std::string _name, bool _default_value, float _mutate_rate)
+{
+    name = _name;
+    mutate_rate = _mutate_rate;
+    value = _default_value;
+
+    this->validate();
+
+}
 
 // Getters
 /**

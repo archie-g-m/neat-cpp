@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <queue>
+#include <unordered_map>
 #include "genes.h"
 #include "aggregations.h"
 #include "activations.h"
@@ -293,6 +295,7 @@ ConnectionGene *Genome::new_connection(std::pair<int, int> connection_key)
 
     std::string enable_key = "enable";
     BoolAttribute *enable = new BoolAttribute(enable_key,
+                                              this->config->enabled_default,
                                               this->config->enabled_mutate_rate);
 
     std::vector<Attribute *> connection_attributes;
@@ -420,6 +423,162 @@ void Genome::mutate()
 {
     // maybe remove the activated assertion and just activate network every mutation
     this->activated = false;
+    if(rand()/RAND_MAX < config->node_add_prob){
+        this->mutate_add_node();
+    }
+    if(rand()/RAND_MAX < config->node_delete_prob){
+        this->mutate_delete_node();
+    }    
+    if(rand()/RAND_MAX < config->conn_add_prob){
+        this->mutate_add_conn();
+    }    
+    if(rand()/RAND_MAX < config->conn_delete_prob){
+        this->mutate_delete_conn();
+    }
+}
+/**
+ * @brief adds random node
+ * 
+ */
+void Genome::mutate_add_node(){
+    // Choose random connection
+    auto conn_it = this->connections.cbegin();
+    std::advance(conn_it, int(rand()%this->connections.size()));
+    std::pair<int, int> conn = conn_it->first;
+    int in = conn.first;
+    int out = conn.second;
+    // You will always be adding a hidden node
+    // Hidden nodes are always positive and begin their indexing at num_outputs
+    int new_node_key = this->get_num_outputs() + this->get_num_hidden();
+    NodeGene* new_node = this->new_node(new_node_key);
+    this->nodes[new_node_key] = new_node;
+    this->hidden_keys.insert(new_node_key);
+    // Now Disable the connection we are splitting
+    this->connections[conn]->disable();
+    // Generate the new connections into and out of the new node
+    std::pair<int,int> in_key = {in, new_node_key};
+    ConnectionGene* in_conn = this->new_connection(in_key);
+    this->connections[in_key] = in_conn;
+    std::pair<int,int> out_key = {new_node_key, out};
+    ConnectionGene* out_conn = this->new_connection(out_key);
+    this->connections[out_key] = out_conn;
+}
+/**
+ * @brief deletes random node
+ * 
+ */
+void Genome::mutate_delete_node(){
+    // if there are no hidden keys to delete then break
+    if(this->get_num_hidden()<=0){return;}
+    // otherwise pick a random hidden node
+    auto node_key = this->hidden_keys.cbegin();
+    std::advance(node_key, rand()%this->get_num_hidden());
+    int node_to_remove = *node_key;
+    // remove the node from the node map
+    delete(this->nodes[node_to_remove]); //delete the node from memory
+    this->nodes.erase(node_to_remove); // delete the key and pointer from map
+    // remove all connections to the node from the connection key
+    std::vector<std::pair<int, int>> conns_to_remove = {}; // store all the keys before erasing them from the map
+    for(auto it : this->connections){
+        std::pair<int,int> key = it.first;
+        ConnectionGene* conn = it.second;
+        // if this node goes into or out of the node to remove then delete it
+        if(key.first == node_to_remove || key.second == node_to_remove){
+            delete(conn); // delete the memory at the pointer
+            conns_to_remove.push_back(key); // add this connection to the list of connections to remove from the map
+        }
+    }
+    // remove all the needed conneciotns from the map
+    for(std::pair<int,int> c : conns_to_remove){
+        this->connections.erase(c);
+    }
+}
+/**
+ * @brief adds new connection
+ * 
+ */
+void Genome::mutate_add_conn(){
+    std::set<int> possible_inputs;
+    std::set_union(input_keys.begin(), input_keys.end(), hidden_keys.begin(), hidden_keys.end(), std::inserter(possible_inputs, possible_inputs.begin()));
+
+    std::set<int> possible_outputs;
+    std::set_union(hidden_keys.begin(), hidden_keys.end(), output_keys.begin(), output_keys.end(), std::inserter(possible_outputs, possible_outputs.begin()));
+
+    // Generate all permutations of inputs and outputs
+    // Notes: 
+    // - Node cant connect to itself
+    // - Node can not connect a loop
+    std::set<std::pair<int, int>> possible_connections;
+    for(int i : possible_inputs){
+        for(int o : possible_outputs){
+            // Construct the possible connection key
+            std::pair<int,int> conn_key = {i, o};
+            // Pass if attempting to make a connection to itself
+            if(i == o){continue;}
+            // Pass if this connection already exists
+            if(this->connections.find(conn_key) != this->connections.end()){continue;}
+            // Pass if this connections completes the a cycle
+            if(this->creates_cycle(conn_key)){continue;}
+            // If you reached this point, its safe to add it to a possible conneciton
+            possible_connections.insert(conn_key);
+        }
+    }
+    // Pick a random connection from the possible connections and add it to the network
+    auto it = possible_connections.begin();
+    std::advance(it, rand()%possible_connections.size());
+    std::pair<int,int> conn_key = *it;
+    this->connections[conn_key] = new_connection(conn_key);
+}
+/**
+ * @brief deletes random connection
+ * 
+ */
+void Genome::mutate_delete_conn(){
+    auto it = this->connections.begin();
+    std::advance(it, rand()%this->connections.size());
+    delete(it->second);
+    this->connections.erase(it->first);
+}
+/**
+ * @brief checks whether the given connection creates a cycle in the nodes
+ * 
+ * @param conn 
+ * @return true 
+ * @return false 
+ */
+bool Genome::creates_cycle(std::pair<int,int> conn){
+    // Create a map of node keys and the nodes they connect to
+    std::unordered_map<int, std::vector<int>> conn_map;
+    for(auto it: connections){
+        std::pair<int,int> key = it.first;
+        // If input is not in map create list
+        if(conn_map.find(key.first) == conn_map.end()){
+            std::vector<int> outs = {key.second};
+            conn_map[key.first] = outs;
+        } else {
+            conn_map[key.first].push_back(key.second);
+        }
+    }
+
+    std::set<int> visited;
+    std::queue<int> q;
+    q.push(conn.second);
+    int curr;
+    //BFS, if you get to the beginning of the test connection then
+    while(!q.empty()){
+        curr = q.front();
+        q.pop();
+        visited.insert(curr);
+        for(int o : conn_map[curr]){
+            //if the potential node is the beginning of the cycle then return true
+            if(o == conn.first){return true;}
+            if(visited.find(o) == visited.end()){
+                q.push(o);
+            }
+        }
+    }
+    // If you BFS'd through all the points and didnt create a loop then return false
+    return false;
 }
 /**
  * @brief activates this network to be efficiently computed in the forward function
@@ -453,13 +612,12 @@ void Genome::activate()
             }
         }
 
-
         if (add_node)
         {
             this->forward_order.push_back(*key_ptr);
             added_keys.insert(*key_ptr);
             int complete_key = *key_ptr;
-             // Continuously loop thorugh hidden keys until theyre done
+            // Continuously loop thorugh hidden keys until theyre done
             if (key_ptr == hidden_key_copy.end())
             {
                 key_ptr = hidden_key_copy.begin();
@@ -482,9 +640,6 @@ void Genome::activate()
                 ++key_ptr;
             }
         }
-
-
-       
     }
     // outputs dont depend on eachother so you can just add them all last
     for (int out_key : this->output_keys)
@@ -503,7 +658,6 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
 {
     assert(this->activated);
 
-
     if (inputs.size() != this->input_keys.size())
     {
         throw std::invalid_argument("Incorrect number of keys provided, given: " +
@@ -513,7 +667,7 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
     }
 
     std::map<int, float> input_values;
-    std::set<int> *node_inputs;
+    std::set<int>* node_inputs;
     float node_value;
     for (int node_key : this->forward_order)
     {
@@ -524,28 +678,30 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
         std::string aggregation_method = this_node->get_attribute("aggregation")->get_string_value();
         // If this node is an input pull it's value from the inputs
         std::set<int>::iterator input_ind = this->input_keys.find(node_key);
-        if (input_ind != this->input_keys.end())
+        if (input_ind == this->input_keys.end())
+        {
+            // If this node is not an input, aggregate the node's inputs to be the value
+            node_inputs = this->node_inputs[node_key];
+            std::vector<float> agg_vec;
+            for (int node_input_id : *node_inputs)
+
+            {
+                agg_vec.push_back(input_values[node_input_id]);
+            }
+            node_value = aggregate_vector(agg_vec, aggregation_method);
+        }
+        else
         {
             node_value = inputs[std::distance(input_keys.begin(), input_ind)];
         }
-        // If this node is not an input, aggregate the node's inputs to be the value
-        else
-        {
-            node_inputs = this->node_inputs[node_key];
-            std::vector<float> input_values;
-            for (int node_input_id : *node_inputs){
-                input_values.push_back(input_values[node_input_id]);
-            }
-            node_value = aggregate_vector(input_values, aggregation_method);
-        }
-        // Apply activation function to the value
-        node_value = activate_value((bias+(response*node_value)), activation_method);
+         // Apply activation function to the value
+        node_value = activate_value((bias + (response * node_value)), activation_method);
         input_values[node_key] = node_value;
     }
-
     std::vector<float> outputs;
 
-    for (int out_key : output_keys){
+    for (int out_key : output_keys)
+    {
         outputs.push_back(input_values[out_key]);
     }
 

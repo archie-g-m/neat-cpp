@@ -20,7 +20,6 @@ TEST(GENOMETEST, ConstructionTestFullDirect)
     int calc_num_nodes = (2 * (4 + 10)) + (4 * 10);
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
-
 TEST(GENOMETEST, ConstructionTestFullIndirect)
 {
     ConfigParser *config = new ConfigParser("ValidConfigIndirect.cfg");
@@ -38,7 +37,6 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
     int calc_num_nodes = (2 * 4) + (4 * 10);
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
-
 TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
 {
     ConfigParser *config = new ConfigParser("ValidConfigDirectNoHidden.cfg");
@@ -57,7 +55,6 @@ TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
     int calc_num_nodes = 2 * 4;
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
-
 TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
 {
     ConfigParser *config = new ConfigParser("ValidConfigIndirectNoHidden.cfg");
@@ -75,8 +72,75 @@ TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
     int calc_num_nodes = 2 * 4;
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
+TEST(GENOMETEST, ForwardRepeatabilityTest){
+    ConfigParser *config = new ConfigParser("ValidConfigDirect.cfg");
+    GenomeConfig *genome_config = new GenomeConfig(config);
 
+    Genome *genome = new Genome(1, genome_config);    
+    std::vector<float> test_in ;
+    for(int i=1; i<=genome_config->num_inputs; i++){test_in.push_back((float)i);}
+    std::vector<std::vector<float>> outs;
+    for(int i=0; i<10; i++){
+        genome->activate();
+        std::vector<float> out = genome->forward(test_in);
+        outs.push_back(out);
+    }
+    for(int i=1; i<outs.size(); i++){
+        for(int j=0; j<outs[i].size(); j++){
+            ASSERT_EQ(outs[i-1][j], outs[i][j]);
+        }
+    }
+}
+TEST(GENOMETEST, MutateAddNodeTest)
+{
+    ConfigParser *config = new ConfigParser("MutateNodeAdd.cfg");
+    GenomeConfig *genome_config = new GenomeConfig(config);
+    Genome *genome = new Genome(5, genome_config);
 
+    int before_nodes = genome->get_num_nodes();
+    int before_conns = genome->get_num_connections();
+    genome->mutate();
+    int after_nodes = genome->get_num_nodes();
+    int after_conns = genome->get_num_connections();
+
+    ASSERT_EQ(after_nodes-before_nodes, 1);
+    ASSERT_EQ(after_conns-before_conns, 2);
+}
+TEST(GENOMETEST, MutateDeleteNodeTest)
+{
+    ConfigParser *config = new ConfigParser("MutateNodeDel.cfg");
+    GenomeConfig *genome_config = new GenomeConfig(config);
+    Genome *genome = new Genome(5, genome_config);
+
+    int before_nodes = genome->get_num_nodes();
+    genome->mutate();
+    int after_nodes = genome->get_num_nodes();
+
+    ASSERT_EQ(before_nodes-after_nodes, 1);
+}
+TEST(GENOMETEST, MutateDeleteConnTest)
+{
+    ConfigParser *config = new ConfigParser("MutateConnDel.cfg");
+    GenomeConfig *genome_config = new GenomeConfig(config);
+    Genome *genome = new Genome(5, genome_config);
+
+    int before_conns = genome->get_num_connections();
+    genome->mutate();
+    int after_conns = genome->get_num_connections();
+
+    ASSERT_EQ(before_conns-after_conns, 1);
+}
+TEST(GENOMETEST, MutateAddConnTest)
+{
+    ConfigParser *config = new ConfigParser("MutateConnAdd.cfg");
+    GenomeConfig *genome_config = new GenomeConfig(config);
+    Genome *genome = new Genome(5, genome_config);
+    int before_conns = genome->get_num_connections();
+    genome->mutate();
+    int after_conns = genome->get_num_connections();
+
+    ASSERT_EQ(after_conns-before_conns, 1);
+}
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

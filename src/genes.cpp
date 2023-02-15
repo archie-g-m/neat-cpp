@@ -428,3 +428,25 @@ void ConnectionGene::verify_attributes()
         (it->second)->validate();
     };
 }
+/**
+ * @brief enables the 'enable' attribute of this Connection gene
+ * 
+ */
+void ConnectionGene::enable(){
+    // if not enabled, replace the enable attribute with a new one with the default value true
+    if(!get_attribute("enable")->get_bool_value()){
+        float mr = this->get_attribute("enable")->get_mutate_rate();
+        this->attributes["enable"] = new BoolAttribute("enable", true, mr);
+    }
+}
+/**
+ * @brief disables the 'enable' attribute of this Connection gene
+ * 
+ */
+void ConnectionGene::disable(){
+    // if enabled, replace the enable attribute with a new one with the default value false
+    if(get_attribute("enable")->get_bool_value()){
+        float mr = this->get_attribute("enable")->get_mutate_rate();
+        this->attributes["enable"] = new BoolAttribute("enable", true, mr);
+    }
+}

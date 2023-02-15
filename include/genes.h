@@ -56,6 +56,8 @@ public:
     ConnectionGene *copy();
     ConnectionGene *crossover(ConnectionGene *gene2);
     std::string to_string();
+    void disable();
+    void enable();
 
 private:
     void verify_attributes();
