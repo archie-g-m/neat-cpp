@@ -5,7 +5,7 @@
 
 TEST(GENOMETEST, ConstructionTestFullDirect)
 {
-    ConfigParser *config = new ConfigParser("ValidConfigDirect.cfg");
+    ConfigParser *config = new ConfigParser("config/ValidConfigDirect.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(1, genome_config);
@@ -22,7 +22,7 @@ TEST(GENOMETEST, ConstructionTestFullDirect)
 }
 TEST(GENOMETEST, ConstructionTestFullIndirect)
 {
-    ConfigParser *config = new ConfigParser("ValidConfigIndirect.cfg");
+    ConfigParser *config = new ConfigParser("config/ValidConfigIndirect.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(2, genome_config);
@@ -39,7 +39,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
 }
 TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
 {
-    ConfigParser *config = new ConfigParser("ValidConfigDirectNoHidden.cfg");
+    ConfigParser *config = new ConfigParser("config/ValidConfigDirectNoHidden.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(3, genome_config);
@@ -57,7 +57,7 @@ TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
 }
 TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
 {
-    ConfigParser *config = new ConfigParser("ValidConfigIndirectNoHidden.cfg");
+    ConfigParser *config = new ConfigParser("config/ValidConfigIndirectNoHidden.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(4, genome_config);
@@ -73,7 +73,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
 TEST(GENOMETEST, ForwardRepeatabilityTest){
-    ConfigParser *config = new ConfigParser("ValidConfigDirect.cfg");
+    ConfigParser *config = new ConfigParser("config/ValidConfigDirect.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
 
     Genome *genome = new Genome(1, genome_config);    
@@ -93,7 +93,7 @@ TEST(GENOMETEST, ForwardRepeatabilityTest){
 }
 TEST(GENOMETEST, MutateAddNodeTest)
 {
-    ConfigParser *config = new ConfigParser("MutateNodeAdd.cfg");
+    ConfigParser *config = new ConfigParser("config/MutateNodeAdd.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
     Genome *genome = new Genome(5, genome_config);
 
@@ -108,7 +108,7 @@ TEST(GENOMETEST, MutateAddNodeTest)
 }
 TEST(GENOMETEST, MutateDeleteNodeTest)
 {
-    ConfigParser *config = new ConfigParser("MutateNodeDel.cfg");
+    ConfigParser *config = new ConfigParser("config/MutateNodeDel.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
     Genome *genome = new Genome(5, genome_config);
 
@@ -120,7 +120,7 @@ TEST(GENOMETEST, MutateDeleteNodeTest)
 }
 TEST(GENOMETEST, MutateDeleteConnTest)
 {
-    ConfigParser *config = new ConfigParser("MutateConnDel.cfg");
+    ConfigParser *config = new ConfigParser("config/MutateConnDel.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
     Genome *genome = new Genome(5, genome_config);
 
@@ -132,7 +132,7 @@ TEST(GENOMETEST, MutateDeleteConnTest)
 }
 TEST(GENOMETEST, MutateAddConnTest)
 {
-    ConfigParser *config = new ConfigParser("MutateConnAdd.cfg");
+    ConfigParser *config = new ConfigParser("config/MutateConnAdd.cfg");
     GenomeConfig *genome_config = new GenomeConfig(config);
     Genome *genome = new Genome(5, genome_config);
     int before_conns = genome->get_num_connections();

@@ -4,17 +4,17 @@
 #include <gtest/gtest.h>
 
 TEST(CONFIGPARSER, BlankFileName){
-  ConfigParser test = ConfigParser("");
+  ConfigParser test = ConfigParser("config/");
   ASSERT_TRUE(test.data.empty());
 }
 
 TEST(CONFIGPARSER, EmptyFile){
-  ConfigParser test = ConfigParser("blank.cfg");
+  ConfigParser test = ConfigParser("config/blank.cfg");
   ASSERT_TRUE(test.data.empty());
 }
 
 TEST(CONFIGPARSER, TestFile){
-  ConfigParser test = ConfigParser("test_config.cfg");
+  ConfigParser test = ConfigParser("config/test_config.cfg");
   ASSERT_TRUE(!test.data.empty());
   ASSERT_TRUE(!test.data["TITLE1"].empty());
   ASSERT_EQ(test.data["TITLE1"]["test"], "1");
@@ -26,7 +26,7 @@ TEST(CONFIGPARSER, TestFile){
 }
 
 TEST(CONFIGPARSER, StripWhitespace){
-  ConfigParser test = ConfigParser("space_test.cfg");
+  ConfigParser test = ConfigParser("config/space_test.cfg");
   ASSERT_EQ(test.data["TESTYTEST"]["asdf"], "asdfa");
   ASSERT_EQ(test.data["TESTYTEST"]["abcd"], "asdf");
   ASSERT_EQ(test.data["TESTYTEST"]["123"], "2458");

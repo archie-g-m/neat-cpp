@@ -4,17 +4,17 @@
 #include <gtest/gtest.h>
 
 TEST(GENOMECONFIG, IncorrectCategoryTest){
-    ConfigParser* config = new ConfigParser("NoDefaultGenome.cfg");
+    ConfigParser* config = new ConfigParser("config/NoDefaultGenome.cfg");
     ASSERT_THROW(new GenomeConfig(config), std::invalid_argument);
 }
 
 TEST(GENOMECONFIG, MissingFieldTest){
-    ConfigParser* config = new ConfigParser("MissingField.cfg");
+    ConfigParser* config = new ConfigParser("config/MissingField.cfg");
     ASSERT_THROW(new GenomeConfig(config), std::invalid_argument);
 }
 
 TEST(GENOMECONFIG, CorrectConversionTest){
-    ConfigParser* config = new ConfigParser("ValidConfigDirect.cfg");
+    ConfigParser* config = new ConfigParser("config/ValidConfigDirect.cfg");
     GenomeConfig* genome_config = new GenomeConfig(config);
 
     ASSERT_EQ(genome_config->activation_default, "relu");
