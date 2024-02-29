@@ -31,8 +31,7 @@ static std::map<std::string, valid_activations> act_map = {
     {"clamped", clamped_act},
     {"abs", abs_act},
     {"square", square_act},
-    {"cubed", cubed_act}
-};
+    {"cubed", cubed_act}};
 
 inline float linear_activation(float &x) { return x; }
 
@@ -48,7 +47,8 @@ inline float relu_activation(float &x) { return x > 0 ? x : 0.F; }
 
 inline float softplus_activation(float &x) { return std::log1pf(std::exp(x)); }
 
-inline float clamped_activation(float &x) { return (x > 1.F) ? 1.F : (x < -1.F) ? -1.F : x; }
+inline float clamped_activation(float &x) { return (x > 1.F) ? 1.F : (x < -1.F) ? -1.F
+                                                                                : x; }
 
 inline float abs_activation(float &x) { return std::fabs(x); }
 

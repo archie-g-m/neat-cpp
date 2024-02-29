@@ -25,7 +25,7 @@ ConfigParser::ConfigParser(std::string fname)
         if (header_lead != std::string::npos && header_tail != std::string::npos)
         {
             // Strip the leading '[' symbol
-            line.erase(0, line.find("[")+1);
+            line.erase(0, line.find("[") + 1);
             // Strip the trailing ']' symbol
             line.erase(line.find("]"), line.size() - 1);
             // Strip all whitespace between brackets

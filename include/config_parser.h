@@ -4,16 +4,17 @@
 #include <map>
 #include <string>
 
-class ConfigParser{
-    public:
-        ConfigParser(std::string fname);
+class ConfigParser
+{
+public:
+    ConfigParser(std::string fname);
 
-        std::map<std::string, std::map<std::string, std::string>> data;
+    std::map<std::string, std::map<std::string, std::string>> data;
 
-        std::string to_string();
+    std::string to_string();
 
-    private:
-        void strip_whitespace(std::string* value);
+private:
+    void strip_whitespace(std::string *value);
 };
 
-#endif //CONFIGPARSER_H
+#endif // CONFIGPARSER_H
