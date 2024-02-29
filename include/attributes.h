@@ -5,7 +5,7 @@
 #include <random>
 #include <set>
 
-enum valid_types
+enum AttributeTypes
 {
     float_attribute,
     int_attribute,
@@ -29,19 +29,19 @@ public:
     virtual std::string get_string_value() = 0;
     virtual float get_mutate_rate() = 0;
 
-
     // Other Methods
-    virtual Attribute *copy() = 0;
+    virtual std::shared_ptr<Attribute> copy() = 0;
     virtual void mutate_value() = 0;
     virtual std::string to_string() = 0;
     virtual bool validate() = 0;
+
 protected:
     float mutate_rate;
 };
 
 class BoolAttribute : public Attribute
 {
-public:    
+public:
     bool value;
 
 public:
@@ -56,7 +56,7 @@ public:
     float get_mutate_rate();
 
     // Other Methods
-    BoolAttribute *copy();
+    std::shared_ptr<Attribute> copy();
     void mutate_value();
     std::string to_string();
     bool validate();
@@ -88,7 +88,7 @@ public:
     int get_max_value();
 
     // Other Methods
-    IntAttribute *copy();
+    std::shared_ptr<Attribute> copy();
     void mutate_value();
     std::string to_string();
     bool validate();
@@ -120,7 +120,7 @@ public:
     float get_max_value();
 
     // Other Methods
-    FloatAttribute *copy();
+    std::shared_ptr<Attribute> copy();
     void mutate_value();
     std::string to_string();
     bool validate();
@@ -137,18 +137,18 @@ private:
     std::default_random_engine generator;
 
 public:
-    StringAttribute(std::string _name, float _mutate_rate,  std::set<std::string> _options);
+    StringAttribute(std::string _name, float _mutate_rate, std::set<std::string> _options);
     float get_float_value();
     bool get_bool_value();
     std::string get_string_value();
     float get_mutate_rate();
     std::set<std::string> get_options();
 
-    StringAttribute *copy();
+    std::shared_ptr<Attribute> copy();
     void mutate_value();
     std::string to_string();
     bool validate();
-    
+
 private:
     std::string random_option();
 };

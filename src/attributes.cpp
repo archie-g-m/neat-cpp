@@ -24,10 +24,10 @@ BoolAttribute::BoolAttribute(std::string _name, float _mutate_rate)
 }
 /**
  * @brief Construct a new Bool Attribute:: Bool Attribute object
- * 
- * @param _name 
- * @param _default_value 
- * @param _mutate_rate 
+ *
+ * @param _name
+ * @param _default_value
+ * @param _mutate_rate
  */
 BoolAttribute::BoolAttribute(std::string _name, bool _default_value, float _mutate_rate)
 {
@@ -36,7 +36,6 @@ BoolAttribute::BoolAttribute(std::string _name, bool _default_value, float _muta
     value = _default_value;
 
     this->validate();
-
 }
 
 // Getters
@@ -64,7 +63,7 @@ std::string BoolAttribute::get_string_value() { return value ? "true" : "false";
  *
  * @return float
  */
-float BoolAttribute::get_mutate_rate() { return mutate_rate; };
+float BoolAttribute::get_mutate_rate() { return mutate_rate; }
 
 // Other Methods
 /**
@@ -72,9 +71,9 @@ float BoolAttribute::get_mutate_rate() { return mutate_rate; };
  *
  * @return BoolAttribute*
  */
-BoolAttribute *BoolAttribute::copy()
+std::shared_ptr<Attribute> BoolAttribute::copy()
 {
-    BoolAttribute *ret_attr = new BoolAttribute(this->name, this->mutate_rate);
+    std::shared_ptr<BoolAttribute> ret_attr = std::make_shared<BoolAttribute>(this->name, this->mutate_rate);
     ret_attr->value = this->value;
     return ret_attr;
 }
@@ -86,7 +85,7 @@ void BoolAttribute::mutate_value()
     if (rand_bool(mutate_rate))
     {
         value = rand_bool(0.5);
-    };
+    }
 }
 /**
  * @brief Provides a string detailing the class for debugging
@@ -143,7 +142,7 @@ IntAttribute::IntAttribute(std::string _name, float _mutate_rate, float _mutate_
     this->validate();
 
     value = min_value + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max_value - min_value));
-};
+}
 
 // Getters
 /**
@@ -170,25 +169,25 @@ std::string IntAttribute::get_string_value() { return std::to_string(value); }
  *
  * @return float
  */
-float IntAttribute::get_mutate_rate() { return mutate_rate; };
+float IntAttribute::get_mutate_rate() { return mutate_rate; }
 /**
  * @brief Gets Mutate Power
  *
  * @return float
  */
-float IntAttribute::get_mutate_power() { return mutate_power; };
+float IntAttribute::get_mutate_power() { return mutate_power; }
 /**
  * @brief Gets Minimum Value of Attribute
  *
  * @return int
  */
-int IntAttribute::get_min_value() { return min_value; };
+int IntAttribute::get_min_value() { return min_value; }
 /**
  * @brief Gets Maximum Value of Attribute
  *
  * @return int
  */
-int IntAttribute::get_max_value() { return max_value; };
+int IntAttribute::get_max_value() { return max_value; }
 
 // Other Methods
 /**
@@ -196,13 +195,13 @@ int IntAttribute::get_max_value() { return max_value; };
  *
  * @return IntAttribute*
  */
-IntAttribute *IntAttribute::copy()
+std::shared_ptr<Attribute> IntAttribute::copy()
 {
-    IntAttribute *ret_attr = new IntAttribute(this->name,
-                                              this->mutate_rate,
-                                              this->mutate_power,
-                                              this->min_value,
-                                              this->max_value);
+    std::shared_ptr<IntAttribute> ret_attr = std::make_shared<IntAttribute>(this->name,
+                                                                            this->mutate_rate,
+                                                                            this->mutate_power,
+                                                                            this->min_value,
+                                                                            this->max_value);
     ret_attr->value = this->value;
     return ret_attr;
 }
@@ -218,7 +217,7 @@ void IntAttribute::mutate_value()
         value = (value < min_value) ? min_value : (max_value > value) ? value
                                                                       : max_value;
     }
-};
+}
 /**
  * @brief Provides a string detailing the class for debugging
  *
@@ -257,7 +256,7 @@ bool IntAttribute::validate()
     {
         throw(std::invalid_argument("Mutate Power (" + std::to_string(this->mutate_rate) + ") must be greater than 0"));
     }
-    
+
     return true;
 }
 
@@ -286,7 +285,7 @@ FloatAttribute::FloatAttribute(std::string _name, float _mutate_rate, float _mut
     this->validate();
 
     value = min_value + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max_value - min_value));
-};
+}
 
 // Getters
 /**
@@ -313,25 +312,25 @@ std::string FloatAttribute::get_string_value() { return std::to_string(value); }
  *
  * @return float
  */
-float FloatAttribute::get_mutate_rate() { return mutate_rate; };
+float FloatAttribute::get_mutate_rate() { return mutate_rate; }
 /**
  * @brief Gets Mutate Power
  *
  * @return float
  */
-float FloatAttribute::get_mutate_power() { return mutate_power; };
+float FloatAttribute::get_mutate_power() { return mutate_power; }
 /**
  * @brief Gets Minimum Value of Attribute
  *
  * @return float
  */
-float FloatAttribute::get_min_value() { return min_value; };
+float FloatAttribute::get_min_value() { return min_value; }
 /**
  * @brief Gets Maximum Value of Attribute
  *
  * @return float
  */
-float FloatAttribute::get_max_value() { return max_value; };
+float FloatAttribute::get_max_value() { return max_value; }
 
 // Other Methods
 /**
@@ -339,13 +338,13 @@ float FloatAttribute::get_max_value() { return max_value; };
  *
  * @return FloatAttribute*
  */
-FloatAttribute *FloatAttribute::copy()
+std::shared_ptr<Attribute> FloatAttribute::copy()
 {
-    FloatAttribute *ret_attr = new FloatAttribute(this->name,
-                                                  this->mutate_rate,
-                                                  this->mutate_power,
-                                                  this->min_value,
-                                                  this->max_value);
+    std::shared_ptr<FloatAttribute> ret_attr = std::make_shared<FloatAttribute>(this->name,
+                                                                                this->mutate_rate,
+                                                                                this->mutate_power,
+                                                                                this->min_value,
+                                                                                this->max_value);
     ret_attr->value = this->value;
     return ret_attr;
 }
@@ -361,7 +360,7 @@ void FloatAttribute::mutate_value()
         value = (value < min_value) ? min_value : (max_value > value) ? value
                                                                       : max_value;
     }
-};
+}
 /**
  * @brief Provides a string detailing the class for debugging
  *
@@ -425,9 +424,12 @@ std::string StringAttribute::random_option()
 float StringAttribute::get_float_value()
 {
     float fl;
-    try{
+    try
+    {
         fl = std::stof(value);
-    } catch(std::invalid_argument){
+    }
+    catch (std::invalid_argument)
+    {
         fl = 0;
     }
     return fl;
@@ -449,11 +451,11 @@ std::set<std::string> StringAttribute::get_options()
     return options;
 }
 
-StringAttribute *StringAttribute::copy()
+std::shared_ptr<Attribute> StringAttribute::copy()
 {
-    StringAttribute *ret_attr = new StringAttribute(name,
-                                                    mutate_rate,
-                                                    options);
+    std::shared_ptr<StringAttribute> ret_attr = std::make_shared<StringAttribute>(name,
+                                                                                  mutate_rate,
+                                                                                  options);
 
     ret_attr->value = this->value;
 

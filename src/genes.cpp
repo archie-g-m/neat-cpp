@@ -13,10 +13,10 @@
  */
 void Gene::mutate()
 {
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         it->second->mutate_value();
-    };
+    }
 }
 /**
  * @brief Checks whether Gene has attribute
@@ -41,37 +41,37 @@ bool Gene::verify_ind_attribute(std::string _key, std::string _type)
 {
     if (!this->has_attribute(_key))
     {
-        std::invalid_argument("Attributes must contain a '" + _key + "' Attribute");
+        throw std::invalid_argument("Attributes must contain a '" + _key + "' Attribute");
     }
 
     switch (type_map[_type])
     {
     case float_attribute:
-        if (dynamic_cast<FloatAttribute *>(attributes[_key]) == nullptr)
+        if (std::dynamic_pointer_cast<FloatAttribute>(attributes[_key]) == nullptr)
         {
-            throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
+            throw std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'");
         }
         break;
     case int_attribute:
-        if (dynamic_cast<IntAttribute *>(attributes[_key]) == nullptr)
+        if (std::dynamic_pointer_cast<IntAttribute>(attributes[_key]) == nullptr)
         {
-            throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
+            throw std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'");
         }
         break;
     case bool_attribute:
-        if (dynamic_cast<BoolAttribute *>(attributes[_key]) == nullptr)
+        if (std::dynamic_pointer_cast<BoolAttribute>(attributes[_key]) == nullptr)
         {
-            throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
+            throw std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'");
         }
         break;
     case string_attribute:
-        if (dynamic_cast<StringAttribute *>(attributes[_key]) == nullptr)
+        if (std::dynamic_pointer_cast<StringAttribute>(attributes[_key]) == nullptr)
         {
-            throw(std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'"));
+            throw std::invalid_argument("Attribute '" + _key + "' must be of type '" + _type + "'");
         }
         break;
     default:
-        throw(std::invalid_argument("Invalid Attribute Type '" + _type + "' Requested for Attribute'" + _key + "'"));
+        throw std::invalid_argument("Invalid Attribute Type '" + _type + "' Requested for Attribute'" + _key + "'");
         break;
     }
     return true;
@@ -88,41 +88,40 @@ bool Gene::verify_ind_attribute(std::string _key, std::vector<std::string> _type
 {
     if (!(this->has_attribute(_key)))
     {
-        throw(std::invalid_argument("Attributes must contain a '" + _key + "' Attribute"));
+        throw std::invalid_argument("Attributes must contain a '" + _key + "' Attribute");
     }
 
     bool correct_type = false;
-    for (int i = 0; i < _types.size(); i++)
+    for (std::string _type : _types)
     {
-        std::string _type = _types[i];
         switch (type_map[_type])
         {
         case float_attribute:
-            if (dynamic_cast<FloatAttribute *>(attributes[_key]) != nullptr)
+            if (std::dynamic_pointer_cast<FloatAttribute>(attributes[_key]) != nullptr)
             {
                 correct_type = true;
             }
             break;
         case int_attribute:
-            if (dynamic_cast<IntAttribute *>(attributes[_key]) != nullptr)
+            if (std::dynamic_pointer_cast<IntAttribute>(attributes[_key]) != nullptr)
             {
                 correct_type = true;
             }
             break;
         case bool_attribute:
-            if (dynamic_cast<BoolAttribute *>(attributes[_key]) != nullptr)
+            if (std::dynamic_pointer_cast<BoolAttribute>(attributes[_key]) != nullptr)
             {
                 correct_type = true;
             }
             break;
         case string_attribute:
-            if (dynamic_cast<StringAttribute *>(attributes[_key]) != nullptr)
+            if (std::dynamic_pointer_cast<StringAttribute>(attributes[_key]) != nullptr)
             {
                 correct_type = true;
             }
             break;
         default:
-            throw(std::invalid_argument("Invalid Attribute Type '" + _type + "' Requested for Attribute'" + _key + "'"));
+            throw std::invalid_argument("Invalid Attribute Type '" + _type + "' Requested for Attribute'" + _key + "'");
             break;
         }
         if (correct_type)
@@ -148,7 +147,7 @@ bool Gene::verify_ind_attribute(std::string _key, std::vector<std::string> _type
  * @param _key
  * @return Attribute*
  */
-Attribute *Gene::get_attribute(std::string _key)
+std::shared_ptr<Attribute> Gene::get_attribute(std::string _key)
 {
     if (this->has_attribute(_key))
     {
@@ -168,13 +167,13 @@ Attribute *Gene::get_attribute(std::string _key)
  * @param _key
  * @param _attributes
  */
-NodeGene::NodeGene(int _key, std::vector<Attribute *> _attributes)
+NodeGene::NodeGene(int _key, std::vector<std::shared_ptr<Attribute>> _attributes)
 {
     key = _key;
     for (int i = 0; i < _attributes.size(); i++)
     {
         attributes[_attributes[i]->name] = _attributes[i];
-    };
+    }
 
     verify_attributes();
 }
@@ -186,13 +185,13 @@ NodeGene::NodeGene(int _key, std::vector<Attribute *> _attributes)
  * @param other
  * @return float
  */
-float NodeGene::distance(NodeGene *other)
+float NodeGene::distance(std::shared_ptr<NodeGene> &other)
 {
     // Get Values of Each Attribute
-    float bias = this->attributes["bias"]->get_float_value();
-    float response = this->attributes["response"]->get_float_value();
-    std::string activation = this->attributes["activation"]->get_string_value();
-    std::string aggregation = this->attributes["aggregation"]->get_string_value();
+    float bias = attributes["bias"]->get_float_value();
+    float response = attributes["response"]->get_float_value();
+    std::string activation = attributes["activation"]->get_string_value();
+    std::string aggregation = attributes["aggregation"]->get_string_value();
 
     float bias_other = other->attributes["bias"]->get_float_value();
     float response_other = other->attributes["response"]->get_float_value();
@@ -210,35 +209,35 @@ float NodeGene::distance(NodeGene *other)
  *
  * @return NodeGene*
  */
-NodeGene *NodeGene::copy()
+std::shared_ptr<NodeGene> NodeGene::copy()
 {
-    std::vector<Attribute *> attributes_copy;
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<std::shared_ptr<Attribute>> attributes_copy;
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        Attribute *new_attr = (it->second)->copy();
+        std::shared_ptr<Attribute> new_attr = (it->second)->copy();
         attributes_copy.push_back(new_attr);
     }
-    return new NodeGene(key, attributes_copy);
-};
+    return std::make_shared<NodeGene>(key, attributes_copy);
+}
 /**
- * @brief Creates an new NodeGene with a mix of attributes between each gene
+ * @brief Creates an std::make_shared<NodeGene>  with a mix of attributes between each gene
  *
  * @return NodeGene*
  */
-NodeGene *NodeGene::crossover(NodeGene *gene2)
+std::shared_ptr<NodeGene> NodeGene::crossover(std::shared_ptr<NodeGene> &gene2)
 {
-    if (this->key != gene2->key)
+    if (key != gene2->key)
     {
-        throw(std::invalid_argument("Invalid Crossover between NodeGeene: " +
-                                    std::to_string(this->key) + ", " +
-                                    std::to_string(gene2->key)));
-    };
+        throw std::invalid_argument("Invalid Crossover between NodeGeene: " +
+                                    std::to_string(key) + ", " +
+                                    std::to_string(gene2->key));
+    }
 
-    std::vector<Attribute *> attributes_copy;
+    std::vector<std::shared_ptr<Attribute>> attributes_copy;
     // Find all
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        Attribute *new_attr;
+        std::shared_ptr<Attribute> new_attr;
         // If the Attribute is shared between the genes then randomly pick one of the parents to inherit from
         if (gene2->has_attribute(it->first))
         {
@@ -252,11 +251,11 @@ NodeGene *NodeGene::crossover(NodeGene *gene2)
                 std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
                 new_attr = (it->second)->copy();
             }
+            attributes_copy.push_back(new_attr);
         }
-        attributes_copy.push_back(new_attr);
-    };
+    }
 
-    return new NodeGene(this->key, attributes_copy);
+    return std::make_shared<NodeGene>(key, attributes_copy);
 }
 /**
  * @brief Generates a printable string for this Gene
@@ -266,10 +265,10 @@ NodeGene *NodeGene::crossover(NodeGene *gene2)
 std::string NodeGene::to_string()
 {
     std::string ret_str = "NodeGene '" + std::to_string(key) + "'";
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         ret_str = ret_str + "\n\t" + (it->second)->to_string();
-    };
+    }
     return ret_str;
 }
 /**
@@ -296,13 +295,13 @@ void NodeGene::verify_attributes()
 
     // Check whether StringAttribute 'Aggregation' is in Gene
     std::vector<std::string> agg_types;
-    act_types.push_back("StringAttribute");
+    agg_types.push_back("StringAttribute");
     verify_ind_attribute("aggregation", agg_types);
 
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         (it->second)->validate();
-    };
+    }
 }
 
 /// ------------ ConnectionGene Definitions ------------///
@@ -314,13 +313,13 @@ void NodeGene::verify_attributes()
  * @param _key
  * @param _attributes
  */
-ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<Attribute *> _attributes)
+ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<std::shared_ptr<Attribute>> _attributes)
 {
-    this->key = _key;
+    key = _key;
     for (int i = 0; i < _attributes.size(); i++)
     {
         attributes[_attributes[i]->name] = _attributes[i];
-    };
+    }
 
     verify_attributes();
 }
@@ -332,14 +331,14 @@ ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<Attribute *
  * @param other
  * @return float
  */
-float ConnectionGene::distance(ConnectionGene *other)
+float ConnectionGene::distance(std::shared_ptr<ConnectionGene> &other)
 {
-    float weight = this->attributes["weight"]->get_float_value();
+    float weight = attributes["weight"]->get_float_value();
     float other_weight = other->attributes["weight"]->get_float_value();
 
     float dist = std::abs(weight - other_weight);
 
-    if (this->attributes["enable"]->get_bool_value() xor other->attributes["enable"]->get_bool_value())
+    if (attributes["enable"]->get_bool_value() xor other->attributes["enable"]->get_bool_value())
     {
         dist += 1.0F;
     }
@@ -351,47 +350,53 @@ float ConnectionGene::distance(ConnectionGene *other)
  *
  * @return ConnectionGene*
  */
-ConnectionGene *ConnectionGene::copy()
+std::shared_ptr<ConnectionGene> ConnectionGene::copy()
 {
-    std::vector<Attribute *> attributes_copy;
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<std::shared_ptr<Attribute>> attributes_copy;
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        Attribute *new_attr = (it->second)->copy();
+        std::shared_ptr<Attribute> new_attr = (it->second)->copy();
         attributes_copy.push_back(new_attr);
-    };
-    return new ConnectionGene(this->key, attributes_copy);
+    }
+    return std::make_shared<ConnectionGene>(this->key, attributes_copy);
 }
 /**
- * @brief Creates an new ConnectionGene with a mix of attributes between each gene
+ * @brief Creates an std::make_shared<ConnectionGene>  with a mix of attributes between each gene
  *
  * @return ConnectionGene*
  */
-ConnectionGene *ConnectionGene::crossover(ConnectionGene *gene2)
+std::shared_ptr<ConnectionGene> ConnectionGene::crossover(std::shared_ptr<ConnectionGene> &gene2)
 {
     if ((this->key.first != gene2->key.first) && (this->key.second != gene2->key.second))
     {
-        throw(std::invalid_argument("Invalid Crossover between ConnectionGeene: (" +
+        throw std::invalid_argument("Invalid Crossover between ConnectionGeene: (" +
                                     std::to_string(this->key.first) + ", " +
                                     std::to_string(this->key.second) + ") and (" +
                                     std::to_string(gene2->key.first) + ", " +
-                                    std::to_string(gene2->key.second) + ")"));
-    };
+                                    std::to_string(gene2->key.second) + ")");
+    }
 
-    std::vector<Attribute *> attributes_copy;
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<std::shared_ptr<Attribute>> attributes_copy;
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        Attribute *new_attr;
-        if (rand_bool(0.5))
+        std::shared_ptr<Attribute> new_attr;
+        // If the Attribute is shared between the genes then randomly pick one of the parents to inherit from
+        if (gene2->has_attribute(it->first))
         {
-            new_attr = (it->second)->copy();
+            if (rand_bool(0.5))
+            {
+                std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
+                new_attr = gene2->attributes[it->first]->copy();
+            }
+            else
+            {
+                std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
+                new_attr = (it->second)->copy();
+            }
+            attributes_copy.push_back(new_attr);
         }
-        else
-        {
-            new_attr = gene2->attributes[it->first]->copy();
-        }
-        attributes_copy.push_back(new_attr);
-    };
-    return new ConnectionGene(this->key, attributes_copy);
+    }
+    return std::make_shared<ConnectionGene>(this->key, attributes_copy);
 }
 /**
  * @brief Generates a printable string for this Gene
@@ -401,10 +406,10 @@ ConnectionGene *ConnectionGene::crossover(ConnectionGene *gene2)
 std::string ConnectionGene::to_string()
 {
     std::string ret_str = "ConnectionGene (" + std::to_string(key.first) + ", " + std::to_string(key.second) + ")";
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         ret_str = ret_str + "\n\t" + (it->second)->to_string();
-    };
+    }
 
     return ret_str;
 }
@@ -423,30 +428,34 @@ void ConnectionGene::verify_attributes()
     // Check whether BoolAttribute 'enables' is in Gene
     verify_ind_attribute("enable", "BoolAttribute");
 
-    for (std::map<std::string, Attribute *>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         (it->second)->validate();
-    };
+    }
 }
 /**
  * @brief enables the 'enable' attribute of this Connection gene
- * 
+ *
  */
-void ConnectionGene::enable(){
+void ConnectionGene::enable()
+{
     // if not enabled, replace the enable attribute with a new one with the default value true
-    if(!get_attribute("enable")->get_bool_value()){
+    if (!get_attribute("enable")->get_bool_value())
+    {
         float mr = this->get_attribute("enable")->get_mutate_rate();
-        this->attributes["enable"] = new BoolAttribute("enable", true, mr);
+        this->attributes["enable"] = std::make_shared<BoolAttribute>("enable", true, mr);
     }
 }
 /**
  * @brief disables the 'enable' attribute of this Connection gene
- * 
+ *
  */
-void ConnectionGene::disable(){
+void ConnectionGene::disable()
+{
     // if enabled, replace the enable attribute with a new one with the default value false
-    if(get_attribute("enable")->get_bool_value()){
+    if (get_attribute("enable")->get_bool_value())
+    {
         float mr = this->get_attribute("enable")->get_mutate_rate();
-        this->attributes["enable"] = new BoolAttribute("enable", true, mr);
+        this->attributes["enable"] = std::make_shared<BoolAttribute>("enable", true, mr);
     }
 }

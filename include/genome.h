@@ -70,7 +70,7 @@ public:
     float weight_mutate_rate;
     float weight_replace_rate;
 
-    //Mutation Parameters
+    // Mutation Parameters
 
     GenomeConfig(ConfigParser *_config);
 
@@ -84,6 +84,7 @@ class Genome
 public:
     int key;
     float fitness;
+
 private:
     GenomeConfig *config;
 
@@ -91,11 +92,11 @@ private:
     std::set<int> output_keys;
     std::set<int> hidden_keys;
 
-    std::map<std::pair<int,int>, ConnectionGene *> connections;
-    std::map<int, NodeGene *> nodes;
+    std::map<std::pair<int, int>, std::shared_ptr<ConnectionGene>> connections;
+    std::map<int, std::shared_ptr<NodeGene>> nodes;
 
     std::vector<int> forward_order;
-    std::map<int, std::set<int>*> node_inputs;
+    std::map<int, std::set<int>> node_inputs_map;
     bool activated;
 
 public:
@@ -113,16 +114,15 @@ public:
     std::vector<float> forward(std::vector<float> inputs);
 
 private:
-    NodeGene *new_node(int node_key);
-    ConnectionGene *new_connection(std::pair<int, int> connection_key);
+    std::shared_ptr<NodeGene> new_node(int node_key);
+    std::shared_ptr<ConnectionGene> new_connection(std::pair<int, int> connection_key);
     std::vector<std::pair<int, int>> generate_full_connections(bool direct);
     void generate_node_inputs();
     void mutate_add_node();
     void mutate_delete_node();
     void mutate_add_conn();
     void mutate_delete_conn();
-    bool creates_cycle(std::pair<int,int> conn);
+    bool creates_cycle(std::pair<int, int> conn);
 };
-
 
 #endif // GENOME_H
