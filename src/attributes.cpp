@@ -13,7 +13,7 @@
  * @param _name name of the Attribute
  * @param _mutate_rate probability of mutating the value
  */
-BoolAttribute::BoolAttribute(std::string _name, float _mutate_rate)
+BoolAttribute::BoolAttribute(const std::string &_name, const float &_mutate_rate)
 {
     name = _name;
     mutate_rate = _mutate_rate;
@@ -29,7 +29,7 @@ BoolAttribute::BoolAttribute(std::string _name, float _mutate_rate)
  * @param _default_value
  * @param _mutate_rate
  */
-BoolAttribute::BoolAttribute(std::string _name, bool _default_value, float _mutate_rate)
+BoolAttribute::BoolAttribute(const std::string &_name, const bool &_default_value, const float &_mutate_rate)
 {
     name = _name;
     mutate_rate = _mutate_rate;
@@ -129,7 +129,7 @@ bool BoolAttribute::validate()
  * @param _min_value Minimum value of the attribute
  * @param _max_value Maximum Value of the attribute
  */
-IntAttribute::IntAttribute(std::string _name, float _mutate_rate, float _mutate_power, int _min_value, int _max_value)
+IntAttribute::IntAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const int &_min_value, const int &_max_value)
 {
     name = _name;
     mutate_rate = _mutate_rate;
@@ -141,7 +141,7 @@ IntAttribute::IntAttribute(std::string _name, float _mutate_rate, float _mutate_
 
     this->validate();
 
-    value = min_value + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max_value - min_value));
+    value = min_value + (rand_dec() * (max_value - min_value));
 }
 
 // Getters
@@ -272,7 +272,7 @@ bool IntAttribute::validate()
  * @param _min_value Minimum value of the attribute
  * @param _max_value Maximum Value of the attribute
  */
-FloatAttribute::FloatAttribute(std::string _name, float _mutate_rate, float _mutate_power, float _min_value, float _max_value)
+FloatAttribute::FloatAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const float &_min_value, const float &_max_value)
 {
     name = _name;
     mutate_rate = _mutate_rate;
@@ -284,7 +284,7 @@ FloatAttribute::FloatAttribute(std::string _name, float _mutate_rate, float _mut
 
     this->validate();
 
-    value = min_value + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max_value - min_value));
+    value = min_value + (rand_dec() * (max_value - min_value));
 }
 
 // Getters
@@ -402,7 +402,7 @@ bool FloatAttribute::validate()
     return true;
 }
 
-StringAttribute::StringAttribute(std::string _name, float _mutate_rate, std::set<std::string> _options)
+StringAttribute::StringAttribute(const std::string &_name, const float &_mutate_rate, const std::set<std::string> &_options)
 {
     name = _name;
     mutate_rate = _mutate_rate;

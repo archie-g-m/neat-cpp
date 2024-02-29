@@ -12,8 +12,9 @@ enum AttributeTypes
     bool_attribute,
     string_attribute
 };
-
-static bool rand_bool(float cutoff) { return ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) < cutoff); };
+constexpr float RAND_MAX_INV = 1.0F / static_cast<float>(RAND_MAX);
+static float rand_dec() { return static_cast<float>(rand()) * RAND_MAX_INV; }
+static bool rand_bool(float cutoff) { return (rand_dec() < cutoff); }
 
 class Attribute
 {
@@ -46,8 +47,8 @@ public:
 
 public:
     // Constructors
-    BoolAttribute(std::string _name, float _mutate_rate);
-    BoolAttribute(std::string _name, bool _default_value, float _mutate_rate);
+    BoolAttribute(const std::string &_name, const float &_mutate_rate);
+    BoolAttribute(const std::string &_name, const bool &_default_value, const float &_mutate_rate);
 
     // Getters
     float get_float_value();
@@ -76,7 +77,7 @@ private:
 
 public:
     // Constructors
-    IntAttribute(std::string _name, float _mutate_rate, float _mutate_power, int _min_value, int _max_value);
+    IntAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const int &_min_value, const int &_max_value);
 
     // Getters
     float get_float_value();
@@ -108,7 +109,7 @@ private:
 
 public:
     // Constructors
-    FloatAttribute(std::string _name, float _mutate_rate, float _mutate_power, float _min_value, float _max_value);
+    FloatAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const float &_min_value, const float &_max_value);
 
     // Getters
     float get_float_value();
@@ -137,7 +138,7 @@ private:
     std::default_random_engine generator;
 
 public:
-    StringAttribute(std::string _name, float _mutate_rate, std::set<std::string> _options);
+    StringAttribute(const std::string &_name, const float &_mutate_rate, const std::set<std::string> &_options);
     float get_float_value();
     bool get_bool_value();
     std::string get_string_value();

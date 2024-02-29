@@ -13,7 +13,7 @@
 #include "activations.h"
 #include "config_parser.h"
 
-GenomeConfig::GenomeConfig(ConfigParser *_config)
+GenomeConfig::GenomeConfig(std::shared_ptr<ConfigParser> _config)
 {
     // Configure from Parser
     if (!(_config->data.count("DefaultGenome")))
@@ -130,7 +130,7 @@ std::set<std::string> GenomeConfig::split_string(std::string str)
     return result;
 }
 
-Genome::Genome(int _key, GenomeConfig *_genome_config)
+Genome::Genome(int _key, std::shared_ptr<GenomeConfig> _genome_config)
 {
     key = _key;
     fitness = 0.F;
@@ -423,19 +423,19 @@ void Genome::mutate()
 {
     // maybe remove the activated assertion and just activate network every mutation
     activated = false;
-    if (rand() / RAND_MAX < config->node_add_prob)
+    if (rand() * RAND_MAX_INV < config->node_add_prob)
     {
         mutate_add_node();
     }
-    if (rand() / RAND_MAX < config->node_delete_prob)
+    if (rand() * RAND_MAX_INV < config->node_delete_prob)
     {
         mutate_delete_node();
     }
-    if (rand() / RAND_MAX < config->conn_add_prob)
+    if (rand() * RAND_MAX_INV < config->conn_add_prob)
     {
         mutate_add_conn();
     }
-    if (rand() / RAND_MAX < config->conn_delete_prob)
+    if (rand() * RAND_MAX_INV < config->conn_delete_prob)
     {
         mutate_delete_conn();
     }
@@ -563,6 +563,7 @@ void Genome::mutate_delete_conn()
     // delete(it->second);
     connections.erase(it->first);
 }
+
 /**
  * @brief checks whether the given connection creates a cycle in the nodes
  *

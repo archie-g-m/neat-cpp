@@ -72,7 +72,7 @@ public:
 
     // Mutation Parameters
 
-    GenomeConfig(ConfigParser *_config);
+    GenomeConfig(std::shared_ptr<ConfigParser> _config);
 
 private:
     bool to_bool(std::string str);
@@ -86,7 +86,7 @@ public:
     float fitness;
 
 private:
-    GenomeConfig *config;
+    std::shared_ptr<GenomeConfig> config;
 
     std::set<int> input_keys;
     std::set<int> output_keys;
@@ -101,7 +101,7 @@ private:
 
 public:
     // Constructor
-    Genome(int _key, GenomeConfig *_genome_config);
+    Genome(int _key, std::shared_ptr<GenomeConfig> _genome_config);
 
     int get_num_inputs();
     int get_num_outputs();

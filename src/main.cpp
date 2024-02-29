@@ -15,13 +15,13 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     std::string fname = argv[1];
 
-    ConfigParser *config = new ConfigParser(fname);
+    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>(fname);
 
     std::cout << config->to_string() << std::endl;
 
-    GenomeConfig *genome_config = new GenomeConfig(config);
+    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
 
-    Genome *genome = new Genome(1, genome_config);
+    std::shared_ptr<Genome> genome = std::make_shared<Genome>(1, genome_config);
     std::cout << "Activating Network" << std::endl;
     genome->activate();
     std::cout << "Running Forward Computation on Network" << std::endl;

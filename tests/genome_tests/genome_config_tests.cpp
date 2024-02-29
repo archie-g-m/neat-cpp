@@ -3,19 +3,22 @@
 
 #include <gtest/gtest.h>
 
-TEST(GENOMECONFIG, IncorrectCategoryTest){
-    ConfigParser* config = new ConfigParser("config/NoDefaultGenome.cfg");
-    ASSERT_THROW(new GenomeConfig(config), std::invalid_argument);
+TEST(GENOMECONFIG, IncorrectCategoryTest)
+{
+    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/NoDefaultGenome.cfg");
+    ASSERT_THROW(std::make_shared<GenomeConfig>(config), std::invalid_argument);
 }
 
-TEST(GENOMECONFIG, MissingFieldTest){
-    ConfigParser* config = new ConfigParser("config/MissingField.cfg");
-    ASSERT_THROW(new GenomeConfig(config), std::invalid_argument);
+TEST(GENOMECONFIG, MissingFieldTest)
+{
+    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/MissingField.cfg");
+    ASSERT_THROW(std::make_shared<GenomeConfig>(config), std::invalid_argument);
 }
 
-TEST(GENOMECONFIG, CorrectConversionTest){
-    ConfigParser* config = new ConfigParser("config/ValidConfigDirect.cfg");
-    GenomeConfig* genome_config = new GenomeConfig(config);
+TEST(GENOMECONFIG, CorrectConversionTest)
+{
+    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigDirect.cfg");
+    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
 
     ASSERT_EQ(genome_config->activation_default, "relu");
     ASSERT_FLOAT_EQ(genome_config->activation_mutate_rate, 1.0);
