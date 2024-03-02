@@ -35,26 +35,26 @@ static std::map<std::string, valid_activations> act_map = {
 
 inline float linear_activation(float &x) { return x; }
 
-inline float sigmoid_activation(float &x) { return 1.0F / (1.0F + std::expf(-x)); }
+inline float sigmoid_activation(float &x) { return 1.0F / (1.0F + std::exp(-x)); }
 
-inline float tanh_activation(float &x) { return std::tanhf(x); }
+inline float tanh_activation(float &x) { return std::tanh(x); }
 
-inline float sin_activation(float &x) { return std::sinf(x); }
+inline float sin_activation(float &x) { return std::sin(x); }
 
-inline float gauss_activation(float &x) { return std::expf(std::powf(x, 2)); }
+inline float gauss_activation(float &x) { return std::exp(std::pow(x, 2)); }
 
 inline float relu_activation(float &x) { return x > 0 ? x : 0.F; }
 
-inline float softplus_activation(float &x) { return std::log1pf(std::exp(x)); }
+inline float softplus_activation(float &x) { return std::log1p(std::exp(x)); }
 
 inline float clamped_activation(float &x) { return (x > 1.F) ? 1.F : (x < -1.F) ? -1.F
                                                                                 : x; }
 
 inline float abs_activation(float &x) { return std::fabs(x); }
 
-inline float square_activation(float &x) { return std::powf(x, 2); }
+inline float square_activation(float &x) { return std::pow(x, 2); }
 
-inline float cubed_activation(float &x) { return std::powf(x, 3); }
+inline float cubed_activation(float &x) { return std::pow(x, 3); }
 
 float activate_value(float value, std::string method);
 

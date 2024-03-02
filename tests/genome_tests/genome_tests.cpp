@@ -5,8 +5,8 @@
 
 TEST(GENOMETEST, ConstructionTestFullDirect)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigDirect.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/ValidConfigDirect.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
     Genome *genome = new Genome(1, genome_config);
 
@@ -22,8 +22,8 @@ TEST(GENOMETEST, ConstructionTestFullDirect)
 }
 TEST(GENOMETEST, ConstructionTestFullIndirect)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigIndirect.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/ValidConfigIndirect.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
     Genome *genome = new Genome(2, genome_config);
 
@@ -39,8 +39,8 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
 }
 TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigDirectNoHidden.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/ValidConfigDirectNoHidden.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
     Genome *genome = new Genome(3, genome_config);
 
@@ -56,8 +56,8 @@ TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
 }
 TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigIndirectNoHidden.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/ValidConfigIndirectNoHidden.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
     Genome *genome = new Genome(4, genome_config);
 
@@ -73,8 +73,8 @@ TEST(GENOMETEST, ConstructionTestFullIndirectNoHidden)
 }
 TEST(GENOMETEST, ForwardRepeatabilityTest)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/ValidConfigDirect.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/ValidConfigDirect.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
     Genome *genome = new Genome(1, genome_config);
     std::vector<float> test_in;
@@ -99,8 +99,8 @@ TEST(GENOMETEST, ForwardRepeatabilityTest)
 }
 TEST(GENOMETEST, MutateAddNodeTest)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/MutateNodeAdd.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/MutateNodeAdd.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
     Genome *genome = new Genome(5, genome_config);
 
     int before_nodes = genome->get_num_nodes();
@@ -114,8 +114,8 @@ TEST(GENOMETEST, MutateAddNodeTest)
 }
 TEST(GENOMETEST, MutateDeleteNodeTest)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/MutateNodeDel.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/MutateNodeDel.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
     Genome *genome = new Genome(5, genome_config);
 
     int before_nodes = genome->get_num_nodes();
@@ -126,8 +126,8 @@ TEST(GENOMETEST, MutateDeleteNodeTest)
 }
 TEST(GENOMETEST, MutateDeleteConnTest)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/MutateConnDel.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/MutateConnDel.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
     Genome *genome = new Genome(5, genome_config);
 
     int before_conns = genome->get_num_connections();
@@ -138,8 +138,8 @@ TEST(GENOMETEST, MutateDeleteConnTest)
 }
 TEST(GENOMETEST, MutateAddConnTest)
 {
-    std::shared_ptr<ConfigParser> config = std::make_shared<ConfigParser>("config/MutateConnAdd.cfg");
-    std::shared_ptr<GenomeConfig> genome_config = std::make_shared<GenomeConfig>(config);
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/MutateConnAdd.cfg");
+    GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
     Genome *genome = new Genome(5, genome_config);
     int before_conns = genome->get_num_connections();
     genome->mutate();
@@ -147,6 +147,7 @@ TEST(GENOMETEST, MutateAddConnTest)
 
     ASSERT_EQ(after_conns - before_conns, 1);
 }
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

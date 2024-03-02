@@ -1,6 +1,6 @@
 
-cmake_minimum_required(VERSION 3.5.1)
-set(CMAKE_CXX_STANDARD 14)
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(TEST "Enable Testing" OFF)
@@ -8,9 +8,8 @@ option(TEST "Enable Testing" OFF)
 project(neat-cpp
 VERSION 1.0.0
 DESCRIPTION "NEAT Algorithm in C++"
+LANGUAGES CXX
 )
-
-
 
 set(SOURCES
 src/main.cpp

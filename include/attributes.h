@@ -4,6 +4,7 @@
 #include <string>
 #include <random>
 #include <set>
+#include <memory>
 
 enum AttributeTypes
 {
@@ -15,6 +16,9 @@ enum AttributeTypes
 constexpr float RAND_MAX_INV = 1.0F / static_cast<float>(RAND_MAX);
 static float rand_dec() { return static_cast<float>(rand()) * RAND_MAX_INV; }
 static bool rand_bool(float cutoff) { return (rand_dec() < cutoff); }
+
+
+typedef std::shared_ptr<class Attribute> Attribute_ptr;
 
 class Attribute
 {
@@ -31,7 +35,7 @@ public:
     virtual float get_mutate_rate() = 0;
 
     // Other Methods
-    virtual std::shared_ptr<Attribute> copy() = 0;
+    virtual Attribute_ptr copy() = 0;
     virtual void mutate_value() = 0;
     virtual std::string to_string() = 0;
     virtual bool validate() = 0;
@@ -39,6 +43,8 @@ public:
 protected:
     float mutate_rate;
 };
+
+typedef std::shared_ptr<class BoolAttribute> BoolAttribute_ptr;
 
 class BoolAttribute : public Attribute
 {
@@ -57,11 +63,13 @@ public:
     float get_mutate_rate();
 
     // Other Methods
-    std::shared_ptr<Attribute> copy();
+    Attribute_ptr copy();
     void mutate_value();
     std::string to_string();
     bool validate();
 };
+
+typedef std::shared_ptr<class IntAttribute> IntAttribute_ptr;
 
 class IntAttribute : public Attribute
 {
@@ -89,11 +97,13 @@ public:
     int get_max_value();
 
     // Other Methods
-    std::shared_ptr<Attribute> copy();
+    Attribute_ptr copy();
     void mutate_value();
     std::string to_string();
     bool validate();
 };
+
+typedef std::shared_ptr<class FloatAttribute> FloatAttribute_ptr;
 
 class FloatAttribute : public Attribute
 {
@@ -121,11 +131,13 @@ public:
     float get_max_value();
 
     // Other Methods
-    std::shared_ptr<Attribute> copy();
+    Attribute_ptr copy();
     void mutate_value();
     std::string to_string();
     bool validate();
 };
+
+typedef std::shared_ptr<class StringAttribute> StringAttribute_ptr;
 
 class StringAttribute : public Attribute
 {
@@ -145,7 +157,7 @@ public:
     float get_mutate_rate();
     std::set<std::string> get_options();
 
-    std::shared_ptr<Attribute> copy();
+    Attribute_ptr copy();
     void mutate_value();
     std::string to_string();
     bool validate();

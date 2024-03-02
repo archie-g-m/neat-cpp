@@ -8,7 +8,9 @@
 #include "genes.h"
 #include "config_parser.h"
 
-class GenomeConfig
+typedef std::shared_ptr<class GenomeConfig> GenomeConfig_ptr;
+
+class GenomeConfig : SpecialConfig
 {
 public:
     // Distance Parameters
@@ -72,12 +74,10 @@ public:
 
     // Mutation Parameters
 
-    GenomeConfig(std::shared_ptr<ConfigParser> _config);
-
-private:
-    bool to_bool(std::string str);
-    std::set<std::string> split_string(std::string str);
+    GenomeConfig(ConfigParser_ptr _config);
 };
+
+typedef std::shared_ptr<class Genome> Genome_ptr;
 
 class Genome
 {
@@ -86,14 +86,14 @@ public:
     float fitness;
 
 private:
-    std::shared_ptr<GenomeConfig> config;
+    GenomeConfig_ptr config;
 
     std::set<int> input_keys;
     std::set<int> output_keys;
     std::set<int> hidden_keys;
 
-    std::map<std::pair<int, int>, std::shared_ptr<ConnectionGene>> connections;
-    std::map<int, std::shared_ptr<NodeGene>> nodes;
+    std::map<std::pair<int, int>, ConnectionGene_ptr> connections;
+    std::map<int, NodeGene_ptr> nodes;
 
     std::vector<int> forward_order;
     std::map<int, std::set<int>> node_inputs_map;
@@ -101,7 +101,7 @@ private:
 
 public:
     // Constructor
-    Genome(int _key, std::shared_ptr<GenomeConfig> _genome_config);
+    Genome(int _key, GenomeConfig_ptr _genome_config);
 
     int get_num_inputs();
     int get_num_outputs();
@@ -111,11 +111,12 @@ public:
 
     void mutate();
     void activate();
+    float distance(Genome_ptr &other);
     std::vector<float> forward(std::vector<float> inputs);
 
 private:
-    std::shared_ptr<NodeGene> new_node(int node_key);
-    std::shared_ptr<ConnectionGene> new_connection(std::pair<int, int> connection_key);
+    NodeGene_ptr new_node(int node_key);
+    ConnectionGene_ptr new_connection(std::pair<int, int> connection_key);
     std::vector<std::pair<int, int>> generate_full_connections(bool direct);
     void generate_node_inputs();
     void mutate_add_node();

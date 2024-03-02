@@ -1,4 +1,5 @@
 #include "aggregations.h"
+#include <stdexcept>
 
 float aggregate_vector(std::vector<float> values, std::string method)
 {
@@ -8,15 +9,16 @@ float aggregate_vector(std::vector<float> values, std::string method)
     }
     switch (agg_map[method])
     {
-    case (sum):
+    case (valid_aggregations::sum):
         return sum_aggregate(values);
-    case (mean):
+    case (valid_aggregations::mean):
         return mean_aggregate(values);
-    case (max):
+    case (valid_aggregations::max):
         return max_aggregate(values);
-    case (min):
+    case (valid_aggregations::min):
         return min_aggregate(values);
-    case (median):
+    case (valid_aggregations::median):
         return median_aggregate(values);
     };
+    return 0.0F;
 }

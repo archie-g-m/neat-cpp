@@ -1,4 +1,5 @@
 #include "activations.h"
+#include <stdexcept>
 
 float activate_value(float x, std::string method)
 {
@@ -31,4 +32,5 @@ float activate_value(float x, std::string method)
     case (cubed_act):
         return cubed_activation(x);
     };
+    return 0.0F;
 }

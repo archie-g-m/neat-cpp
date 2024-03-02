@@ -6,7 +6,7 @@
 #include <vector>
 #include <numeric>
 
-enum valid_aggregations
+enum class valid_aggregations
 {
     sum,
     mean,
@@ -16,11 +16,11 @@ enum valid_aggregations
 };
 
 static std::map<std::string, valid_aggregations> agg_map = {
-    {"sum", sum},
-    {"mean", mean},
-    {"max", max},
-    {"min", min},
-    {"median", median}};
+    {"sum", valid_aggregations::sum},
+    {"mean", valid_aggregations::mean},
+    {"max", valid_aggregations::max},
+    {"min", valid_aggregations::min},
+    {"median", valid_aggregations::median}};
 
 inline float sum_aggregate(std::vector<float> &values) { return std::accumulate(values.begin(), values.end(), 0); }
 

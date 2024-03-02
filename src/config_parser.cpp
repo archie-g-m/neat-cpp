@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <map>
 
@@ -98,4 +99,70 @@ void ConfigParser::strip_whitespace(std::string *value)
                               { return !std::isspace(ch); })
                      .base(),
                  value->end());
+}
+/**
+ * @brief Get the subdata from the provided config
+ *
+ * @param _config
+ * @param header
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string> SpecialConfig::get_subdata(ConfigParser_ptr _config, std::string _header)
+{
+    // Configure from Parser
+    if (!(_config->data.count(_header)))
+    { // if parser doesnt have the NEAT category throw error
+        throw(std::invalid_argument("Provided ConfigParser does not contain the " + _header + " category"));
+    }
+
+    return _config->data[_header];
+}
+
+/**
+ * @brief splits the input string based on commas
+ *
+ * @param _str
+ * @return std::set<std::string>
+ */
+std::set<std::string> SpecialConfig::split_string(std::string _str)
+{
+    std::set<std::string> result;
+    std::stringstream ss(_str);
+    std::string item;
+    while (std::getline(ss, item, ','))
+    {
+        // Trim leading and trailing whitespace
+        item.erase(item.begin(), std::find_if(item.begin(), item.end(), [](int ch)
+                                              { return !std::isspace(ch); }));
+        item.erase(std::find_if(item.rbegin(), item.rend(), [](int ch)
+                                { return !std::isspace(ch); })
+                       .base(),
+                   item.end());
+        result.insert(item);
+    }
+    return result;
+}
+
+/**
+ * @brief converts string to boolean if it is 'true', 'false', '1' or '0' (case doesn't matter)
+ *
+ * @param _str
+ * @return true
+ * @return false
+ */
+bool SpecialConfig::to_bool(std::string _str)
+{
+    transform(_str.begin(), _str.end(), _str.begin(), ::tolower);
+    if (_str == "true" || _str == "1")
+    {
+        return true;
+    }
+    else if (_str == "false" || _str == "0")
+    {
+        return false;
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid argument '" + _str + "' provided to Genome::to_bool");
+    }
 }

@@ -17,8 +17,8 @@ TEST(FLOATATTR, MutateTest)
 
 TEST(FLOATATTR, CopyTest)
 {
-  std::shared_ptr<FloatAttribute> test = std::make_shared<FloatAttribute>("test2", 0.3F, 3.0F, -10.F, 10.F);
-  std::shared_ptr<FloatAttribute> test2 = std::dynamic_pointer_cast<FloatAttribute>(test->copy());
+  FloatAttribute_ptr test = std::make_shared<FloatAttribute>("test2", 0.3F, 3.0F, -10.F, 10.F);
+  FloatAttribute_ptr test2 = std::dynamic_pointer_cast<FloatAttribute>(test->copy());
   ASSERT_EQ(test->get_float_value(), test2->get_float_value());
   ASSERT_EQ(test->get_mutate_power(), test2->get_mutate_power());
   ASSERT_EQ(test->get_min_value(), test2->get_min_value());
@@ -48,8 +48,8 @@ TEST(INTATTR, MutateTest)
 
 TEST(INTATTR, CopyTest)
 {
-  std::shared_ptr<IntAttribute> test = std::make_shared<IntAttribute>("test2", 0.3F, 3.0F, -10, 10);
-  std::shared_ptr<IntAttribute> test2 = std::dynamic_pointer_cast<IntAttribute>(test->copy());
+  IntAttribute_ptr test = std::make_shared<IntAttribute>("test2", 0.3F, 3.0F, -10, 10);
+  IntAttribute_ptr test2 = std::dynamic_pointer_cast<IntAttribute>(test->copy());
   ASSERT_EQ(test->get_float_value(), test2->get_float_value());
   ASSERT_EQ(test->get_mutate_power(), test2->get_mutate_power());
   ASSERT_EQ(test->get_min_value(), test2->get_min_value());
@@ -73,15 +73,15 @@ TEST(BOOLATTR, ConstructionTest)
 
 TEST(BOOLATTR, MutateTest)
 {
-  std::shared_ptr<BoolAttribute> test = std::make_shared<BoolAttribute>("test2", 1.0F);
+  BoolAttribute_ptr test = std::make_shared<BoolAttribute>("test2", 1.0F);
   test->mutate_value();
   ASSERT_TRUE(test->value || !test->value);
 }
 
 TEST(BOOLATTR, CopyTest)
 {
-  std::shared_ptr<BoolAttribute> test = std::make_shared<BoolAttribute>("test2", 0.3F);
-  std::shared_ptr<BoolAttribute> test2 = std::dynamic_pointer_cast<BoolAttribute>(test->copy());
+  BoolAttribute_ptr test = std::make_shared<BoolAttribute>("test2", 0.3F);
+  BoolAttribute_ptr test2 = std::dynamic_pointer_cast<BoolAttribute>(test->copy());
   ASSERT_EQ(test->get_bool_value(), test2->get_bool_value());
   ASSERT_EQ(test->get_mutate_rate(), test2->get_mutate_rate());
 }
@@ -114,7 +114,7 @@ TEST(STRATTR, MutateTest)
   str_options.insert("option3");
   str_options.insert("option4");
 
-  std::shared_ptr<StringAttribute> str_attr = std::make_shared<StringAttribute>("test1", 1.0, str_options);
+  StringAttribute_ptr str_attr = std::make_shared<StringAttribute>("test1", 1.0, str_options);
   // Kind pf a bad way to test mutation
   for (int i = 0; i < 10; i++)
   {
@@ -131,8 +131,8 @@ TEST(STRATTR, CopyTest)
   str_options.insert("option3");
   str_options.insert("option4");
 
-  std::shared_ptr<StringAttribute> str_attr = std::make_shared<StringAttribute>("test1", 1.0, str_options);
-  std::shared_ptr<StringAttribute> str_attr2 = std::dynamic_pointer_cast<StringAttribute>(str_attr->copy());
+  StringAttribute_ptr str_attr = std::make_shared<StringAttribute>("test1", 1.0, str_options);
+  StringAttribute_ptr str_attr2 = std::dynamic_pointer_cast<StringAttribute>(str_attr->copy());
 
   ASSERT_EQ(str_attr->value, str_attr2->value);
   ASSERT_EQ(str_attr->get_mutate_rate(), str_attr2->get_mutate_rate());

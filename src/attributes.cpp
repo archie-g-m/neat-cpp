@@ -71,9 +71,9 @@ float BoolAttribute::get_mutate_rate() { return mutate_rate; }
  *
  * @return BoolAttribute*
  */
-std::shared_ptr<Attribute> BoolAttribute::copy()
+Attribute_ptr BoolAttribute::copy()
 {
-    std::shared_ptr<BoolAttribute> ret_attr = std::make_shared<BoolAttribute>(this->name, this->mutate_rate);
+    BoolAttribute_ptr ret_attr = std::make_shared<BoolAttribute>(this->name, this->mutate_rate);
     ret_attr->value = this->value;
     return ret_attr;
 }
@@ -195,9 +195,9 @@ int IntAttribute::get_max_value() { return max_value; }
  *
  * @return IntAttribute*
  */
-std::shared_ptr<Attribute> IntAttribute::copy()
+Attribute_ptr IntAttribute::copy()
 {
-    std::shared_ptr<IntAttribute> ret_attr = std::make_shared<IntAttribute>(this->name,
+    IntAttribute_ptr ret_attr = std::make_shared<IntAttribute>(this->name,
                                                                             this->mutate_rate,
                                                                             this->mutate_power,
                                                                             this->min_value,
@@ -338,9 +338,9 @@ float FloatAttribute::get_max_value() { return max_value; }
  *
  * @return FloatAttribute*
  */
-std::shared_ptr<Attribute> FloatAttribute::copy()
+Attribute_ptr FloatAttribute::copy()
 {
-    std::shared_ptr<FloatAttribute> ret_attr = std::make_shared<FloatAttribute>(this->name,
+    FloatAttribute_ptr ret_attr = std::make_shared<FloatAttribute>(this->name,
                                                                                 this->mutate_rate,
                                                                                 this->mutate_power,
                                                                                 this->min_value,
@@ -451,9 +451,9 @@ std::set<std::string> StringAttribute::get_options()
     return options;
 }
 
-std::shared_ptr<Attribute> StringAttribute::copy()
+Attribute_ptr StringAttribute::copy()
 {
-    std::shared_ptr<StringAttribute> ret_attr = std::make_shared<StringAttribute>(name,
+    StringAttribute_ptr ret_attr = std::make_shared<StringAttribute>(name,
                                                                                   mutate_rate,
                                                                                   options);
 

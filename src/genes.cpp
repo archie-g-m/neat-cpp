@@ -13,7 +13,7 @@
  */
 void Gene::mutate()
 {
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         it->second->mutate_value();
     }
@@ -147,7 +147,7 @@ bool Gene::verify_ind_attribute(std::string _key, std::vector<std::string> _type
  * @param _key
  * @return Attribute*
  */
-std::shared_ptr<Attribute> Gene::get_attribute(std::string _key)
+Attribute_ptr Gene::get_attribute(std::string _key)
 {
     if (this->has_attribute(_key))
     {
@@ -167,7 +167,7 @@ std::shared_ptr<Attribute> Gene::get_attribute(std::string _key)
  * @param _key
  * @param _attributes
  */
-NodeGene::NodeGene(int _key, std::vector<std::shared_ptr<Attribute>> _attributes)
+NodeGene::NodeGene(int _key, std::vector<Attribute_ptr> _attributes)
 {
     key = _key;
     for (int i = 0; i < _attributes.size(); i++)
@@ -185,7 +185,7 @@ NodeGene::NodeGene(int _key, std::vector<std::shared_ptr<Attribute>> _attributes
  * @param other
  * @return float
  */
-float NodeGene::distance(std::shared_ptr<NodeGene> &other)
+float NodeGene::distance(NodeGene_ptr &other)
 {
     // Get Values of Each Attribute
     float bias = attributes["bias"]->get_float_value();
@@ -209,12 +209,12 @@ float NodeGene::distance(std::shared_ptr<NodeGene> &other)
  *
  * @return NodeGene*
  */
-std::shared_ptr<NodeGene> NodeGene::copy()
+NodeGene_ptr NodeGene::copy()
 {
-    std::vector<std::shared_ptr<Attribute>> attributes_copy;
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<Attribute_ptr> attributes_copy;
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        std::shared_ptr<Attribute> new_attr = (it->second)->copy();
+        Attribute_ptr new_attr = (it->second)->copy();
         attributes_copy.push_back(new_attr);
     }
     return std::make_shared<NodeGene>(key, attributes_copy);
@@ -224,7 +224,7 @@ std::shared_ptr<NodeGene> NodeGene::copy()
  *
  * @return NodeGene*
  */
-std::shared_ptr<NodeGene> NodeGene::crossover(std::shared_ptr<NodeGene> &gene2)
+NodeGene_ptr NodeGene::crossover(NodeGene_ptr &gene2)
 {
     if (key != gene2->key)
     {
@@ -233,11 +233,11 @@ std::shared_ptr<NodeGene> NodeGene::crossover(std::shared_ptr<NodeGene> &gene2)
                                     std::to_string(gene2->key));
     }
 
-    std::vector<std::shared_ptr<Attribute>> attributes_copy;
+    std::vector<Attribute_ptr> attributes_copy;
     // Find all
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        std::shared_ptr<Attribute> new_attr;
+        Attribute_ptr new_attr;
         // If the Attribute is shared between the genes then randomly pick one of the parents to inherit from
         if (gene2->has_attribute(it->first))
         {
@@ -265,7 +265,7 @@ std::shared_ptr<NodeGene> NodeGene::crossover(std::shared_ptr<NodeGene> &gene2)
 std::string NodeGene::to_string()
 {
     std::string ret_str = "NodeGene '" + std::to_string(key) + "'";
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         ret_str = ret_str + "\n\t" + (it->second)->to_string();
     }
@@ -298,7 +298,7 @@ void NodeGene::verify_attributes()
     agg_types.push_back("StringAttribute");
     verify_ind_attribute("aggregation", agg_types);
 
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         (it->second)->validate();
     }
@@ -313,7 +313,7 @@ void NodeGene::verify_attributes()
  * @param _key
  * @param _attributes
  */
-ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<std::shared_ptr<Attribute>> _attributes)
+ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<Attribute_ptr> _attributes)
 {
     key = _key;
     for (int i = 0; i < _attributes.size(); i++)
@@ -331,7 +331,7 @@ ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<std::shared
  * @param other
  * @return float
  */
-float ConnectionGene::distance(std::shared_ptr<ConnectionGene> &other)
+float ConnectionGene::distance(ConnectionGene_ptr &other)
 {
     float weight = attributes["weight"]->get_float_value();
     float other_weight = other->attributes["weight"]->get_float_value();
@@ -350,12 +350,12 @@ float ConnectionGene::distance(std::shared_ptr<ConnectionGene> &other)
  *
  * @return ConnectionGene*
  */
-std::shared_ptr<ConnectionGene> ConnectionGene::copy()
+ConnectionGene_ptr ConnectionGene::copy()
 {
-    std::vector<std::shared_ptr<Attribute>> attributes_copy;
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<Attribute_ptr> attributes_copy;
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        std::shared_ptr<Attribute> new_attr = (it->second)->copy();
+        Attribute_ptr new_attr = (it->second)->copy();
         attributes_copy.push_back(new_attr);
     }
     return std::make_shared<ConnectionGene>(this->key, attributes_copy);
@@ -365,7 +365,7 @@ std::shared_ptr<ConnectionGene> ConnectionGene::copy()
  *
  * @return ConnectionGene*
  */
-std::shared_ptr<ConnectionGene> ConnectionGene::crossover(std::shared_ptr<ConnectionGene> &gene2)
+ConnectionGene_ptr ConnectionGene::crossover(ConnectionGene_ptr &gene2)
 {
     if ((this->key.first != gene2->key.first) && (this->key.second != gene2->key.second))
     {
@@ -376,10 +376,10 @@ std::shared_ptr<ConnectionGene> ConnectionGene::crossover(std::shared_ptr<Connec
                                     std::to_string(gene2->key.second) + ")");
     }
 
-    std::vector<std::shared_ptr<Attribute>> attributes_copy;
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    std::vector<Attribute_ptr> attributes_copy;
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
-        std::shared_ptr<Attribute> new_attr;
+        Attribute_ptr new_attr;
         // If the Attribute is shared between the genes then randomly pick one of the parents to inherit from
         if (gene2->has_attribute(it->first))
         {
@@ -406,7 +406,7 @@ std::shared_ptr<ConnectionGene> ConnectionGene::crossover(std::shared_ptr<Connec
 std::string ConnectionGene::to_string()
 {
     std::string ret_str = "ConnectionGene (" + std::to_string(key.first) + ", " + std::to_string(key.second) + ")";
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         ret_str = ret_str + "\n\t" + (it->second)->to_string();
     }
@@ -428,7 +428,7 @@ void ConnectionGene::verify_attributes()
     // Check whether BoolAttribute 'enables' is in Gene
     verify_ind_attribute("enable", "BoolAttribute");
 
-    for (std::map<std::string, std::shared_ptr<Attribute>>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         (it->second)->validate();
     }

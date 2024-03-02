@@ -2,26 +2,21 @@
 
 #include <map>
 #include <string>
-#include <sstream>
 #include <iostream>
 #include <vector>
 #include <set>
 #include <queue>
 #include <unordered_map>
+#include <cassert>
 #include "genes.h"
 #include "aggregations.h"
 #include "activations.h"
 #include "config_parser.h"
 
-GenomeConfig::GenomeConfig(std::shared_ptr<ConfigParser> _config)
+GenomeConfig::GenomeConfig(ConfigParser_ptr _config)
 {
     // Configure from Parser
-    if (!(_config->data.count("DefaultGenome")))
-    { // if parser doesnt have the DefaultGenome category throw error
-        throw(std::invalid_argument("Provided ConfigParser does not contain the DefaultGenome category"));
-    }
-
-    std::map<std::string, std::string> GenomeData = _config->data["DefaultGenome"];
+    std::map<std::string, std::string> GenomeData = get_subdata(_config, "DefaultGenome");
 
     // Distance Parameters
     compatibility_disjoint_coefficient = std::stof(GenomeData["compatibility_disjoint_coefficient"]);
@@ -82,55 +77,10 @@ GenomeConfig::GenomeConfig(std::shared_ptr<ConfigParser> _config)
     weight_mutate_rate = std::stof(GenomeData["weight_mutate_rate"]);
     weight_replace_rate = std::stof(GenomeData["weight_replace_rate"]);
 }
-/**
- * @brief converts string to boolean if it is 'true', 'false', '1' or '0' (case doesn't matter)
- *
- * @param str
- * @return true
- * @return false
- */
-bool GenomeConfig::to_bool(std::string str)
-{
-    transform(str.begin(), str.end(), str.begin(), ::tolower);
-    if (str == "true" || str == "1")
-    {
-        return true;
-    }
-    else if (str == "false" || str == "0")
-    {
-        return false;
-    }
-    else
-    {
-        throw std::invalid_argument("Invalid argument '" + str + "' provided to Genome::to_bool");
-    }
-}
-/**
- * @brief splits the input string based on commas
- *
- * @param str
- * @return std::set<std::string>
- */
-std::set<std::string> GenomeConfig::split_string(std::string str)
-{
-    std::set<std::string> result;
-    std::stringstream ss(str);
-    std::string item;
-    while (std::getline(ss, item, ','))
-    {
-        // Trim leading and trailing whitespace
-        item.erase(item.begin(), std::find_if(item.begin(), item.end(), [](int ch)
-                                              { return !std::isspace(ch); }));
-        item.erase(std::find_if(item.rbegin(), item.rend(), [](int ch)
-                                { return !std::isspace(ch); })
-                       .base(),
-                   item.end());
-        result.insert(item);
-    }
-    return result;
-}
 
-Genome::Genome(int _key, std::shared_ptr<GenomeConfig> _genome_config)
+
+
+Genome::Genome(int _key, GenomeConfig_ptr _genome_config)
 {
     key = _key;
     fitness = 0.F;
@@ -245,37 +195,37 @@ int Genome::get_num_nodes()
  * @param node_key
  * @return NodeGene*
  */
-std::shared_ptr<NodeGene> Genome::new_node(int node_key)
+NodeGene_ptr Genome::new_node(int node_key)
 {
     // std::string bias_key = "gene" + std::to_string(key) + "_node" + std::to_string(node_key) + "_bias";
     std::string bias_key = "bias";
-    std::shared_ptr<FloatAttribute> bias = std::make_shared<FloatAttribute>(bias_key,
-                                                                            config->bias_mutate_rate,
-                                                                            config->bias_mutate_power,
-                                                                            config->bias_min_value,
-                                                                            config->bias_max_value);
+    FloatAttribute_ptr bias = std::make_shared<FloatAttribute>(bias_key,
+                                                               config->bias_mutate_rate,
+                                                               config->bias_mutate_power,
+                                                               config->bias_min_value,
+                                                               config->bias_max_value);
     // Create Key that can identify where this attribute is in the network
     // std::string response_key = "gene" + std::to_string(key) + "_node" + std::to_string(node_key) + "_response";
     std::string response_key = "response";
-    std::shared_ptr<FloatAttribute> response = std::make_shared<FloatAttribute>(response_key,
-                                                                                config->response_mutate_rate,
-                                                                                config->response_mutate_power,
-                                                                                config->response_min_value,
-                                                                                config->response_max_value);
+    FloatAttribute_ptr response = std::make_shared<FloatAttribute>(response_key,
+                                                                   config->response_mutate_rate,
+                                                                   config->response_mutate_power,
+                                                                   config->response_min_value,
+                                                                   config->response_max_value);
     std::string activation_key = "activation";
-    std::shared_ptr<StringAttribute> activation = std::make_shared<StringAttribute>(activation_key,
-                                                                                    config->activation_mutate_rate,
-                                                                                    config->activation_options);
+    StringAttribute_ptr activation = std::make_shared<StringAttribute>(activation_key,
+                                                                       config->activation_mutate_rate,
+                                                                       config->activation_options);
     std::string aggregation_key = "aggregation";
-    std::shared_ptr<StringAttribute> aggregation = std::make_shared<StringAttribute>(aggregation_key,
-                                                                                     config->aggregation_mutate_rate,
-                                                                                     config->aggregation_options);
-    std::vector<std::shared_ptr<Attribute>> node_attributes;
+    StringAttribute_ptr aggregation = std::make_shared<StringAttribute>(aggregation_key,
+                                                                        config->aggregation_mutate_rate,
+                                                                        config->aggregation_options);
+    std::vector<Attribute_ptr> node_attributes;
     node_attributes.push_back(bias);
     node_attributes.push_back(response);
     node_attributes.push_back(activation);
     node_attributes.push_back(aggregation);
-    std::shared_ptr<NodeGene> node = std::make_shared<NodeGene>(node_key, node_attributes);
+    NodeGene_ptr node = std::make_shared<NodeGene>(node_key, node_attributes);
     return node;
 }
 /**
@@ -284,25 +234,25 @@ std::shared_ptr<NodeGene> Genome::new_node(int node_key)
  * @param connection_key
  * @return std::shared_pointer<>
  */
-std::shared_ptr<ConnectionGene> Genome::new_connection(std::pair<int, int> connection_key)
+ConnectionGene_ptr Genome::new_connection(std::pair<int, int> connection_key)
 {
     std::string weight_key = "weight";
-    std::shared_ptr<FloatAttribute> weight = std::make_shared<FloatAttribute>(weight_key,
-                                                                              config->weight_mutate_rate,
-                                                                              config->weight_mutate_power,
-                                                                              config->weight_min_value,
-                                                                              config->weight_max_value);
+    FloatAttribute_ptr weight = std::make_shared<FloatAttribute>(weight_key,
+                                                                 config->weight_mutate_rate,
+                                                                 config->weight_mutate_power,
+                                                                 config->weight_min_value,
+                                                                 config->weight_max_value);
 
     std::string enable_key = "enable";
-    std::shared_ptr<BoolAttribute> enable = std::make_shared<BoolAttribute>(enable_key,
-                                                                            config->enabled_default,
-                                                                            config->enabled_mutate_rate);
+    BoolAttribute_ptr enable = std::make_shared<BoolAttribute>(enable_key,
+                                                               config->enabled_default,
+                                                               config->enabled_mutate_rate);
 
-    std::vector<std::shared_ptr<Attribute>> connection_attributes;
+    std::vector<Attribute_ptr> connection_attributes;
     connection_attributes.push_back(weight);
     connection_attributes.push_back(enable);
 
-    std::shared_ptr<ConnectionGene> conneciton = std::make_shared<ConnectionGene>(connection_key, connection_attributes);
+    ConnectionGene_ptr conneciton = std::make_shared<ConnectionGene>(connection_key, connection_attributes);
     return conneciton;
 }
 /**
@@ -399,13 +349,13 @@ void Genome::generate_node_inputs()
 {
     node_inputs_map.clear();
     // add all node keys to input map
-    for (std::map<int, std::shared_ptr<NodeGene>>::iterator node_it = nodes.begin(); node_it != nodes.end(); node_it++)
+    for (std::map<int, NodeGene_ptr>::iterator node_it = nodes.begin(); node_it != nodes.end(); node_it++)
     {
         node_inputs_map.insert(std::pair<int, std::set<int>>(node_it->first, std::set<int>()));
     }
 
     // iterate through all connections and add the input to the list of the output's inputs
-    for (std::map<std::pair<int, int>, std::shared_ptr<ConnectionGene>>::iterator conn_it = connections.begin(); conn_it != connections.end(); conn_it++)
+    for (std::map<std::pair<int, int>, ConnectionGene_ptr>::iterator conn_it = connections.begin(); conn_it != connections.end(); conn_it++)
     {
         // if Connection is enabled then add the input to the list of output's inputs
         if (conn_it->second->get_attribute("enable")->get_bool_value())
@@ -455,17 +405,17 @@ void Genome::mutate_add_node()
     // You will always be adding a hidden node
     // Hidden nodes are always positive and begin their indexing at num_outputs
     int new_node_key = get_num_outputs() + get_num_hidden();
-    std::shared_ptr<NodeGene> new_node_ptr = new_node(new_node_key);
+    NodeGene_ptr new_node_ptr = new_node(new_node_key);
     nodes[new_node_key] = new_node_ptr;
     hidden_keys.insert(new_node_key);
     // Now Disable the connection we are splitting
     connections[conn]->disable();
     // Generate the new connections into and out of the new node
     std::pair<int, int> in_key = {in, new_node_key};
-    std::shared_ptr<ConnectionGene> in_conn = new_connection(in_key);
+    ConnectionGene_ptr in_conn = new_connection(in_key);
     connections[in_key] = in_conn;
     std::pair<int, int> out_key = {new_node_key, out};
-    std::shared_ptr<ConnectionGene> out_conn = new_connection(out_key);
+    ConnectionGene_ptr out_conn = new_connection(out_key);
     connections[out_key] = out_conn;
 }
 /**
@@ -488,10 +438,10 @@ void Genome::mutate_delete_node()
     nodes.erase(node_to_remove); // delete the key and pointer from map
     // remove all connections to the node from the connection key
     std::vector<std::pair<int, int>> conns_to_remove = {}; // store all the keys before erasing them from the map
-    for (std::pair<const std::pair<int, int>, std::shared_ptr<ConnectionGene>> &it : connections)
+    for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &it : connections)
     {
         std::pair<int, int> key = it.first;
-        std::shared_ptr<ConnectionGene> conn = it.second;
+        ConnectionGene_ptr conn = it.second;
         // if this node goes into or out of the node to remove then delete it
         if (key.first == node_to_remove || key.second == node_to_remove)
         {
@@ -684,6 +634,82 @@ void Genome::activate()
     }
     activated = true;
 }
+
+/**
+ * @brief Computes the difference between this genome and the other
+ *
+ * @param other
+ * @return float
+ */
+float Genome::distance(Genome_ptr &other)
+{
+    // Compute node gene distance component.
+    float node_distance = 0.0F;
+    if (nodes.size() > 0 || other->nodes.size() > 0)
+    {
+        float disjoint_nodes = 0.0F;
+        for (std::pair<int, NodeGene_ptr> n2 : other->nodes)
+        {
+            if (nodes.count(n2.first))
+            {
+                disjoint_nodes += 1.0F;
+            }
+        }
+    }
+    float disjoint_nodes = 0.0F;
+    for (std::pair<int, NodeGene_ptr> n1 : nodes)
+    {
+        if (other->nodes.count(n1.first))
+        {
+            disjoint_nodes += 1.0F;
+        }
+        else
+        {
+            // Homologous genes compute their own distance value.
+            NodeGene_ptr n2 = other->nodes[n1.first];
+            node_distance += n1.second->distance(n2);
+        }
+    }
+
+    float max_nodes = fmax(nodes.size(), other->nodes.size());
+    node_distance = (node_distance + (config->compatibility_disjoint_coefficient * disjoint_nodes)) / max_nodes;
+
+    // Compute node gene distance component.
+    float connection_distance = 0.0F;
+    if (connections.size() > 0 || other->connections.size() > 0)
+    {
+        float disjoint_connections = 0.0F;
+        for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &c2 : other->connections)
+        {
+            if (connections.count(c2.first))
+            {
+                disjoint_connections += 1.0F;
+            }
+        }
+    }
+
+    float disjoint_connections = 0.0F;
+    for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &c1 : connections)
+    {
+        if (other->connections.count(c1.first))
+        {
+            disjoint_connections += 1.0F;
+        }
+        else
+        {
+            // Homologous genes compute their own distance value.
+            ConnectionGene_ptr &c2 = other->connections[c1.first];
+            connection_distance += c1.second->distance(c2);
+        }
+    }
+
+    float max_connections = fmax(connections.size(), other->connections.size());
+    connection_distance = (connection_distance + (config->compatibility_disjoint_coefficient * disjoint_connections)) / max_connections;
+
+    float distance = std::fabs(node_distance + connection_distance);
+    return distance;
+}
+
 /**
  * @brief computes the result of providing the given inputs to the network
  *
@@ -707,7 +733,7 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
     float node_value;
     for (int node_key : forward_order)
     {
-        std::shared_ptr<NodeGene> this_node = nodes[node_key];
+        NodeGene_ptr this_node = nodes[node_key];
         float bias = this_node->get_attribute("bias")->get_float_value();
         float response = this_node->get_attribute("response")->get_float_value();
         std::string activation_method = this_node->get_attribute("activation")->get_string_value();

@@ -7,15 +7,17 @@
 #include <memory>
 #include "attributes.h"
 
+typedef std::shared_ptr<class Gene> Gene_ptr;
+
 class Gene
 {
 public:
     // Public Variables
-    std::map<std::string, std::shared_ptr<Attribute>> attributes;
+    std::map<std::string, Attribute_ptr> attributes;
 
     // Member Function Declaration
     bool has_attribute(std::string _key);
-    std::shared_ptr<Attribute> get_attribute(std::string _key);
+    Attribute_ptr get_attribute(std::string _key);
     void mutate();
     std::string to_string();
 
@@ -31,30 +33,34 @@ protected:
         {"StringAttribute", AttributeTypes::string_attribute}};
 };
 
+typedef std::shared_ptr<class NodeGene> NodeGene_ptr;
+
 class NodeGene : public Gene
 {
 public:
     int key;
-    bool operator<(const std::shared_ptr<NodeGene> other) { return this->key < other->key; }
-    NodeGene(int _key, std::vector<std::shared_ptr<Attribute>> _attributes);
-    float distance(std::shared_ptr<NodeGene> &other);
-    std::shared_ptr<NodeGene> copy();
-    std::shared_ptr<NodeGene> crossover(std::shared_ptr<NodeGene> &gene2);
+    bool operator<(const NodeGene_ptr other) { return this->key < other->key; }
+    NodeGene(int _key, std::vector<Attribute_ptr> _attributes);
+    float distance(NodeGene_ptr &other);
+    NodeGene_ptr copy();
+    NodeGene_ptr crossover(NodeGene_ptr &gene2);
     std::string to_string();
 
 private:
     void verify_attributes();
 };
 
+typedef std::shared_ptr<class ConnectionGene> ConnectionGene_ptr;
+
 class ConnectionGene : public Gene
 {
 public:
     std::pair<int, int> key;
-    bool operator<(const std::shared_ptr<ConnectionGene> other) { return std::abs(this->key.first + this->key.second) < std::abs(other->key.first + other->key.second); }
-    ConnectionGene(std::pair<int, int> _key, std::vector<std::shared_ptr<Attribute>> _attributes);
-    float distance(std::shared_ptr<ConnectionGene> &other);
-    std::shared_ptr<ConnectionGene> copy();
-    std::shared_ptr<ConnectionGene> crossover(std::shared_ptr<ConnectionGene> &gene2);
+    bool operator<(const ConnectionGene_ptr other) { return std::abs(this->key.first + this->key.second) < std::abs(other->key.first + other->key.second); }
+    ConnectionGene(std::pair<int, int> _key, std::vector<Attribute_ptr> _attributes);
+    float distance(ConnectionGene_ptr &other);
+    ConnectionGene_ptr copy();
+    ConnectionGene_ptr crossover(ConnectionGene_ptr &gene2);
     std::string to_string();
     void disable();
     void enable();
@@ -62,5 +68,6 @@ public:
 private:
     void verify_attributes();
 };
+
 
 #endif // GENES_H
