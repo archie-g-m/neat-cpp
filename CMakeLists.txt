@@ -18,15 +18,22 @@ src/aggregations.cpp
 src/attributes.cpp
 src/genes.cpp
 src/genome.cpp
-src/config_parser.cpp)
+src/config_parser.cpp
+src/species.cpp
+src/population.cpp)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(${TEST})
+    add_compile_definitions(TEST_MODE)
     enable_testing()
     add_subdirectory(lib/googletest)
     add_subdirectory(tests)
+endif()
+
+if(${EXAMPLES})
+    add_subdirectory(examples)
 endif()
 
 

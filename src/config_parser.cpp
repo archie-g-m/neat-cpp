@@ -35,7 +35,6 @@ ConfigParser::ConfigParser(std::string fname)
             category = line;
             // create an empty map for the data of this category
             data[category] = {};
-            // std::cout << "HEADER: " << line << std::endl;
             continue;
         }
 
@@ -51,8 +50,6 @@ ConfigParser::ConfigParser(std::string fname)
         // Strip the leading and trailing whitespace from the key and value
         strip_whitespace(&key);
         strip_whitespace(&value);
-
-        // std::cout << "KEY: " << key << " VALUE: " << value << std::endl;
 
         data[category][key] = value;
     }
@@ -107,15 +104,17 @@ void ConfigParser::strip_whitespace(std::string *value)
  * @param header
  * @return std::map<std::string, std::string>
  */
-std::map<std::string, std::string> SpecialConfig::get_subdata(ConfigParser_ptr _config, std::string _header)
+std::map<std::string, std::string> ConfigParser::get_subdata(std::string _header)
 {
     // Configure from Parser
-    if (!(_config->data.count(_header)))
+    if (data.count(_header))
     { // if parser doesnt have the NEAT category throw error
+        return data[_header];
+    }
+    else
+    {
         throw(std::invalid_argument("Provided ConfigParser does not contain the " + _header + " category"));
     }
-
-    return _config->data[_header];
 }
 
 /**
@@ -124,7 +123,7 @@ std::map<std::string, std::string> SpecialConfig::get_subdata(ConfigParser_ptr _
  * @param _str
  * @return std::set<std::string>
  */
-std::set<std::string> SpecialConfig::split_string(std::string _str)
+std::set<std::string> SpecialConfig::split_string(const std::string _str)
 {
     std::set<std::string> result;
     std::stringstream ss(_str);
@@ -144,25 +143,149 @@ std::set<std::string> SpecialConfig::split_string(std::string _str)
 }
 
 /**
+ * @brief gets value at provided key as a set of strings split at the commas
+ *
+ * @tparam
+ * @param _str
+ * @return std::set<std::string>
+ */
+template <>
+std::set<std::string> SpecialConfig::get_value<std::set<std::string>>(const std::string _str)
+{
+    if (data.count(_str))
+    {
+        return split_string(data[_str]);
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid key '" + _str + "' provided to 'int SpecialConfig::get_value'");
+    }
+}
+
+/**
+ * @brief gets value at provided key as a string
+ *
+ * @tparam
+ * @param _str
+ * @return std::string
+ */
+template <>
+std::string SpecialConfig::get_value<std::string>(const std::string _str)
+{
+    if (data.count(_str))
+    {
+        return data[_str];
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid key '" + _str + "' provided to 'int SpecialConfig::get_value'");
+    }
+}
+
+/**
  * @brief converts string to boolean if it is 'true', 'false', '1' or '0' (case doesn't matter)
  *
  * @param _str
  * @return true
  * @return false
  */
-bool SpecialConfig::to_bool(std::string _str)
+template <>
+bool SpecialConfig::get_value<bool>(const std::string _str)
 {
-    transform(_str.begin(), _str.end(), _str.begin(), ::tolower);
-    if (_str == "true" || _str == "1")
+    if (data.count(_str))
     {
-        return true;
-    }
-    else if (_str == "false" || _str == "0")
-    {
-        return false;
+        std::string &value_string = data[_str];
+        transform(value_string.begin(), value_string.end(), value_string.begin(), ::tolower);
+        if (value_string == "true" || value_string == "1")
+        {
+            return true;
+        }
+        else if (value_string == "false" || value_string == "0")
+        {
+            return false;
+        }
+        else
+        {
+            throw std::invalid_argument("Invalid value '" + value_string + "' provided to 'bool SpecialConfig::get_value'");
+        }
     }
     else
     {
-        throw std::invalid_argument("Invalid argument '" + _str + "' provided to Genome::to_bool");
+        throw std::invalid_argument("Invalid key '" + _str + "' provided to 'bool SpecialConfig::get_value'");
     }
+}
+
+/**
+ * @brief gets value at provided key as an int
+ *
+ * @tparam
+ * @param _str
+ * @return int
+ */
+template <>
+int SpecialConfig::get_value<int>(const std::string _str)
+{
+    if (data.count(_str))
+    {
+        std::string &value_string = data[_str];
+
+        try
+        {
+            return std::stoi(value_string);
+        }
+        catch (std::invalid_argument &e)
+        {
+            throw std::invalid_argument("Invalid value '" + value_string + "' provided to 'int SpecialConfig::get_value'");
+        }
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid key '" + _str + "' provided to 'int SpecialConfig::get_value'");
+    }
+}
+
+/**
+ * @brief gets value at provided key as a float
+ *
+ * @tparam
+ * @param _str
+ * @return float
+ */
+template <>
+float SpecialConfig::get_value<float>(const std::string _str)
+{
+    if (data.count(_str))
+    {
+        std::string &value_string = data[_str];
+
+        try
+        {
+            return std::stof(value_string);
+        }
+        catch (std::invalid_argument &e)
+        {
+            throw std::invalid_argument("Invalid value '" + value_string + "' provided to 'float SpecialConfig::get_value'");
+        }
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid key '" + _str + "' provided to 'float SpecialConfig::get_value'");
+    }
+}
+
+// Helper function for automatic type deduction
+template <typename T>
+T get_value(const std::string _str)
+{
+    return get_value<T>(_str);
+}
+
+std::string SpecialConfig::to_string()
+{
+    std::string ret_str = "";
+    for (auto &value : data)
+    {
+        ret_str = ret_str + "  - " + value.first + " : " + value.second + "\n";
+    }
+    return ret_str;
 }

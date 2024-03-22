@@ -2,8 +2,8 @@
 #define ATTRIBUTES_H
 
 #include <string>
-#include <random>
 #include <set>
+#include <random>
 #include <memory>
 
 enum AttributeTypes
@@ -16,7 +16,6 @@ enum AttributeTypes
 constexpr float RAND_MAX_INV = 1.0F / static_cast<float>(RAND_MAX);
 static float rand_dec() { return static_cast<float>(rand()) * RAND_MAX_INV; }
 static bool rand_bool(float cutoff) { return (rand_dec() < cutoff); }
-
 
 typedef std::shared_ptr<class Attribute> Attribute_ptr;
 
@@ -53,8 +52,11 @@ public:
 
 public:
     // Constructors
-    BoolAttribute(const std::string &_name, const float &_mutate_rate);
-    BoolAttribute(const std::string &_name, const bool &_default_value, const float &_mutate_rate);
+    BoolAttribute(const std::string &_name,
+                  const float &_mutate_rate);
+    BoolAttribute(const std::string &_name,
+                  const bool &_default_value,
+                  const float &_mutate_rate);
 
     // Getters
     float get_float_value();
@@ -77,15 +79,24 @@ public:
     int value;
 
 private:
+    float mean;
+    float stdev;
+    std::string init_type;
     float mutate_power;
     int min_value;
     int max_value;
     std::normal_distribution<float> distribution;
-    std::default_random_engine generator;
 
 public:
     // Constructors
-    IntAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const int &_min_value, const int &_max_value);
+    IntAttribute(const std::string &_name,
+                 const float &_mean,
+                 const float &_stdev,
+                 const std::string &_init_type,
+                 const float &_mutate_rate,
+                 const float &_mutate_power,
+                 const int &_min_value,
+                 const int &_max_value);
 
     // Getters
     float get_float_value();
@@ -111,16 +122,24 @@ public:
     float value;
 
 private:
+    float mean;
+    float stdev;
+    std::string init_type;
     float mutate_power;
     float min_value;
     float max_value;
     std::normal_distribution<float> distribution;
-    std::default_random_engine generator;
 
 public:
     // Constructors
-    FloatAttribute(const std::string &_name, const float &_mutate_rate, const float &_mutate_power, const float &_min_value, const float &_max_value);
-
+    FloatAttribute(const std::string &_name,
+                   const float &_mean,
+                   const float &_stdev,
+                   const std::string &_init_type,
+                   const float &_mutate_rate,
+                   const float &_mutate_power,
+                   const float &_min_value,
+                   const float &_max_value);
     // Getters
     float get_float_value();
     bool get_bool_value();
@@ -147,10 +166,12 @@ public:
 private:
     std::set<std::string> options;
     std::uniform_int_distribution<int> distribution;
-    std::default_random_engine generator;
 
 public:
-    StringAttribute(const std::string &_name, const float &_mutate_rate, const std::set<std::string> &_options);
+    StringAttribute(
+        const std::string &_name,
+        const float &_mutate_rate,
+        const std::set<std::string> &_options);
     float get_float_value();
     bool get_bool_value();
     std::string get_string_value();

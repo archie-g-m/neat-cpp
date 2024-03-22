@@ -9,9 +9,9 @@ ConnectionGene_ptr create_Connection1()
   std::pair<int, int> key;
   key.first = 1;
   key.second = 2;
-  FloatAttribute_ptr weight1 = std::make_shared<FloatAttribute>("weight", 0.5F, 3.0F, 1.F, 1.F);
-  BoolAttribute_ptr enable1 = std::make_shared<BoolAttribute>("enable", 0.5F);
-  BoolAttribute_ptr other1 = std::make_shared<BoolAttribute>("other", 0.5F);
+  FloatAttribute_ptr weight1 = std::make_shared<FloatAttribute>("weight", 1.F, 0.1F, "gauss", 0.5F, 3.0F, 1.F, 1.F);
+  BoolAttribute_ptr enable1 = std::make_shared<BoolAttribute>("enable", 1.0F);
+  BoolAttribute_ptr other1 = std::make_shared<BoolAttribute>("other", 1.0F);
   std::vector<Attribute_ptr> gene1_attributes;
   gene1_attributes.push_back(weight1);
   gene1_attributes.push_back(enable1);
@@ -25,7 +25,7 @@ ConnectionGene_ptr create_Connection2()
   std::pair<int, int> key;
   key.first = 1;
   key.second = 2;
-  FloatAttribute_ptr weight2 = std::make_shared<FloatAttribute>("weight", 0.5F, 3.0F, 10.F, 10.F);
+  FloatAttribute_ptr weight2 = std::make_shared<FloatAttribute>("weight", 10.F, 0.1F, "gauss", 0.5F, 3.0F, 10.F, 10.F);
   BoolAttribute_ptr enable2 = std::make_shared<BoolAttribute>("enable", 0.5F);
   std::vector<Attribute_ptr> gene2_attributes;
   gene2_attributes.push_back(weight2);
@@ -39,8 +39,8 @@ TEST(CONNECTIONGENE, IncorrectAttributeTest)
   std::pair<int, int> key;
   key.first = 1;
   key.second = 2;
-  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("bias", 0.5F, 3.0F, 1.F, 1.F);
-  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("response", 0.5F, 3.0F, 2.F, 2.F);
+  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("bias", 1.F, 0.1F, "gauss", 0.5F, 3.0F, 1.F, 1.F);
+  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("response", 2.F, 0.1F, "gauss", 0.5F, 3.0F, 2.F, 2.F);
   std::vector<Attribute_ptr> gene1_attributes;
   gene1_attributes.push_back(bias1);
   gene1_attributes.push_back(resp1);

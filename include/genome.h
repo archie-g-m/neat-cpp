@@ -85,6 +85,9 @@ public:
     int key;
     float fitness;
 
+    std::map<std::pair<int, int>, ConnectionGene_ptr> connections;
+    std::map<int, NodeGene_ptr> nodes;
+
 private:
     GenomeConfig_ptr config;
 
@@ -92,16 +95,14 @@ private:
     std::set<int> output_keys;
     std::set<int> hidden_keys;
 
-    std::map<std::pair<int, int>, ConnectionGene_ptr> connections;
-    std::map<int, NodeGene_ptr> nodes;
-
     std::vector<int> forward_order;
     std::map<int, std::set<int>> node_inputs_map;
     bool activated;
 
 public:
     // Constructor
-    Genome(int _key, GenomeConfig_ptr _genome_config);
+    Genome(int _key, ConfigParser_ptr _config);
+    Genome(int _key, Genome_ptr &g1, Genome_ptr &g2, ConfigParser_ptr _config);
 
     int get_num_inputs();
     int get_num_outputs();

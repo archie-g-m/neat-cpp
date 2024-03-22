@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
     GenomeConfig_ptr genome_config = std::make_shared<GenomeConfig>(config);
 
-    Genome_ptr genome = std::make_shared<Genome>(1, genome_config);
+    Genome_ptr genome = std::make_shared<Genome>(1, config);
     std::cout << "Activating Network" << std::endl;
     genome->activate();
     std::cout << "Running Forward Computation on Network" << std::endl;
@@ -41,4 +41,4 @@ int main(int argc, char *argv[])
     std::cout << "Genome Size: " << sizeof(*genome) << " Bytes" << std::endl;
 
     return 0;
-}
+} 

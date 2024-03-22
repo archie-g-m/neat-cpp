@@ -6,8 +6,8 @@
 
 NodeGene_ptr create_Node1()
 {
-  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("bias", 0.5F, 3.0F, 1.F, 1.F);
-  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("response", 0.5F, 3.0F, 2.F, 2.F);
+  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("bias", 1.F, 0.1F, "gauss", 0.5F, 3.0F, 1.F, 1.F);
+  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("response", 2.F, 0.1F, "gauss", 0.5F, 3.0F, 2.F, 2.F);
   std::set<std::string> act_options;
   act_options.insert("relu");
   StringAttribute_ptr act1 = std::make_shared<StringAttribute>("activation", 0.5F, act_options);
@@ -27,8 +27,8 @@ NodeGene_ptr create_Node1()
 
 NodeGene_ptr create_Node2()
 {
-  FloatAttribute_ptr bias2 = std::make_shared<FloatAttribute>("bias", 0.5F, 3.0F, 10.F, 10.F);
-  FloatAttribute_ptr resp2 = std::make_shared<FloatAttribute>("response", 0.5F, 3.0F, 20.F, 20.F);
+  FloatAttribute_ptr bias2 = std::make_shared<FloatAttribute>("bias", 10.F, 0.1F, "gauss", 0.5F, 3.0F, 10.F, 10.F);
+  FloatAttribute_ptr resp2 = std::make_shared<FloatAttribute>("response", 20.F, 0.1F, "gauss", 0.5F, 3.0F, 20.F, 20.F);
   std::set<std::string> act_options;
   act_options.insert("linear");
   StringAttribute_ptr act2 = std::make_shared<StringAttribute>("activation", 0.5F, act_options);
@@ -46,8 +46,8 @@ NodeGene_ptr create_Node2()
 
 NodeGene_ptr create_MutableNode3()
 {
-  FloatAttribute_ptr bias2 = std::make_shared<FloatAttribute>("bias", 0.5F, 3.0F, -10.F, 10.F);
-  FloatAttribute_ptr resp2 = std::make_shared<FloatAttribute>("response", 0.5F, 3.0F, -20.F, 20.F);
+  FloatAttribute_ptr bias2 = std::make_shared<FloatAttribute>("bias", 0.F, 10.F, "gauss", 0.5F, 3.0F, -10.F, 10.F);
+  FloatAttribute_ptr resp2 = std::make_shared<FloatAttribute>("response", 0.F, 5.F, "gauss", 0.5F, 3.0F, -20.F, 20.F);
   std::set<std::string> act_options;
   act_options.insert("relu");
   act_options.insert("linear");
@@ -95,20 +95,23 @@ TEST(GENE, MutateTest)
 {
   Gene_ptr gene1 = create_MutableNode3();
   Gene_ptr gene1_copy = create_MutableNode3();
-  gene1->mutate();
+  for (int i = 0; i < 10; i++)
+  {
+    gene1->mutate();
+  }
   ASSERT_TRUE(gene1->get_attribute("bias")->get_float_value() <= 10.F);
   ASSERT_TRUE(gene1->get_attribute("bias")->get_float_value() >= -10.F);
   ASSERT_TRUE(gene1->get_attribute("bias")->get_float_value() != gene1_copy->get_attribute("bias")->get_float_value());
 
-  ASSERT_TRUE(gene1->get_attribute("response")->get_float_value() <= 20);
+  ASSERT_TRUE(gene1->get_attribute("response")->get_float_value() <= 20.F);
   ASSERT_TRUE(gene1->get_attribute("response")->get_float_value() >= -20);
   ASSERT_TRUE(gene1->get_attribute("response")->get_float_value() != gene1_copy->get_attribute("response")->get_float_value());
 }
 
 TEST(NODEGENE, IncorrectAttributeTest)
 {
-  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("notbias", 0.5F, 3.0F, 1.F, 1.F);
-  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("notresponse", 0.5F, 3.0F, 1.F, 1.F);
+  FloatAttribute_ptr bias1 = std::make_shared<FloatAttribute>("notbias", 1.F, 0.1F, "gauss", 0.5F, 3.0F, 1.F, 1.F);
+  FloatAttribute_ptr resp1 = std::make_shared<FloatAttribute>("notresponse", 1.F, 0.F, "gauss", 0.5F, 3.0F, 1.F, 1.F);
   std::vector<Attribute_ptr> gene1_attributes;
   gene1_attributes.push_back(bias1);
   gene1_attributes.push_back(resp1);

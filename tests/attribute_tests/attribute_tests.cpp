@@ -4,12 +4,12 @@
 // FLOAT ATTRIBUTE
 TEST(FLOATATTR, ConstructionTest)
 {
-  ASSERT_THROW(FloatAttribute("bad_attr", 0.5F, 3.0F, 10.F, -10.F), std::invalid_argument);
+  ASSERT_THROW(FloatAttribute("bad_attr", 0.0F, 5.0F, "gauss", 0.5F, 3.0F, 10.F, -10.F), std::invalid_argument);
 }
 
 TEST(FLOATATTR, MutateTest)
 {
-  FloatAttribute test = FloatAttribute("test1", 1.0F, 100.0F, -10.F, 10.F);
+  FloatAttribute test = FloatAttribute("test1", 0.0F, 5.0F, "gauss", 1.0F, 100.0F, -10.F, 10.F);
   test.mutate_value();
   ASSERT_TRUE(test.get_float_value() <= 10.F);
   ASSERT_TRUE(test.get_float_value() >= -10.F);
@@ -17,7 +17,7 @@ TEST(FLOATATTR, MutateTest)
 
 TEST(FLOATATTR, CopyTest)
 {
-  FloatAttribute_ptr test = std::make_shared<FloatAttribute>("test2", 0.3F, 3.0F, -10.F, 10.F);
+  FloatAttribute_ptr test = std::make_shared<FloatAttribute>("test2", 0.0F, 5.0F, "gauss", 0.3F, 3.0F, -10.F, 10.F);
   FloatAttribute_ptr test2 = std::dynamic_pointer_cast<FloatAttribute>(test->copy());
   ASSERT_EQ(test->get_float_value(), test2->get_float_value());
   ASSERT_EQ(test->get_mutate_power(), test2->get_mutate_power());
@@ -27,7 +27,7 @@ TEST(FLOATATTR, CopyTest)
 
 TEST(FLOATATTR, ConvTest)
 {
-  FloatAttribute test = FloatAttribute("test1", 1.0F, 100.0F, -10.F, 10.F);
+  FloatAttribute test = FloatAttribute("test1", 5.0F, 2.0F, "gauss", 1.0F, 100.0F, 1.F, 10.F);
   ASSERT_TRUE(test.get_bool_value() == true);
   ASSERT_TRUE(test.get_float_value() == static_cast<float>(test.get_float_value()));
 }
@@ -35,12 +35,12 @@ TEST(FLOATATTR, ConvTest)
 // INT ATTRIBUTES
 TEST(INTATTR, ConstructionTest)
 {
-  ASSERT_THROW(IntAttribute("bad_attr", 0.5F, 3.0F, 10, -10), std::invalid_argument);
+  ASSERT_THROW(IntAttribute("bad_attr", 0.0F, 2.5F, "gauss", 0.5F, 3.0F, 10, -10), std::invalid_argument);
 }
 
 TEST(INTATTR, MutateTest)
 {
-  IntAttribute test = IntAttribute("test1", 1.0F, 100.0F, -10, 10);
+  IntAttribute test = IntAttribute("test1", 0.0F, 2.5F, "gauss", 1.0F, 100.0F, -10, 10);
   test.mutate_value();
   ASSERT_TRUE(test.get_float_value() <= 10.F);
   ASSERT_TRUE(test.get_float_value() >= -10.F);
@@ -48,7 +48,7 @@ TEST(INTATTR, MutateTest)
 
 TEST(INTATTR, CopyTest)
 {
-  IntAttribute_ptr test = std::make_shared<IntAttribute>("test2", 0.3F, 3.0F, -10, 10);
+  IntAttribute_ptr test = std::make_shared<IntAttribute>("test2", 0.0F, 2.5F, "gauss", 0.3F, 3.0F, -10, 10);
   IntAttribute_ptr test2 = std::dynamic_pointer_cast<IntAttribute>(test->copy());
   ASSERT_EQ(test->get_float_value(), test2->get_float_value());
   ASSERT_EQ(test->get_mutate_power(), test2->get_mutate_power());
@@ -58,7 +58,7 @@ TEST(INTATTR, CopyTest)
 
 TEST(INTATTR, ConvTest)
 {
-  IntAttribute test = IntAttribute("test1", 1.0F, 100.0F, -10, 10);
+  IntAttribute test = IntAttribute("test1", 0.0F, 10.F, "gauss", 1.0F, 100.0F, -10, 10);
   ASSERT_TRUE(test.get_bool_value() == true);
   ASSERT_TRUE(test.get_float_value() == static_cast<float>(test.get_float_value()));
   ASSERT_TRUE(test.get_string_value() == std::to_string(test.value));
@@ -88,8 +88,8 @@ TEST(BOOLATTR, CopyTest)
 
 TEST(BOOLATTR, ConvTest)
 {
-  IntAttribute test = IntAttribute("test1", 1.0F, 100.0F, -10, 10);
-  ASSERT_TRUE(test.get_bool_value() == test.value);
+  IntAttribute test = IntAttribute("test1", 5.0F, 2.5F, "gauss", 1.0F, 100.0F, 1, 10);
+  ASSERT_TRUE(test.get_bool_value() == static_cast<bool>(test.value));
   ASSERT_TRUE(test.get_float_value() == static_cast<float>(test.get_float_value()));
   ASSERT_TRUE(test.get_string_value() == std::to_string(test.value));
 }

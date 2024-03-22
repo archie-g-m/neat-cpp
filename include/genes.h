@@ -41,7 +41,7 @@ public:
     int key;
     bool operator<(const NodeGene_ptr other) { return this->key < other->key; }
     NodeGene(int _key, std::vector<Attribute_ptr> _attributes);
-    float distance(NodeGene_ptr &other);
+    float distance(NodeGene_ptr &other, float compatability_weight = 1.0F);
     NodeGene_ptr copy();
     NodeGene_ptr crossover(NodeGene_ptr &gene2);
     std::string to_string();
@@ -58,7 +58,7 @@ public:
     std::pair<int, int> key;
     bool operator<(const ConnectionGene_ptr other) { return std::abs(this->key.first + this->key.second) < std::abs(other->key.first + other->key.second); }
     ConnectionGene(std::pair<int, int> _key, std::vector<Attribute_ptr> _attributes);
-    float distance(ConnectionGene_ptr &other);
+    float distance(ConnectionGene_ptr &other, float compatability_weight = 1.0F);
     ConnectionGene_ptr copy();
     ConnectionGene_ptr crossover(ConnectionGene_ptr &gene2);
     std::string to_string();
@@ -68,6 +68,5 @@ public:
 private:
     void verify_attributes();
 };
-
 
 #endif // GENES_H

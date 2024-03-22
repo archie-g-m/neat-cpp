@@ -14,7 +14,7 @@ public:
     ConfigParser(std::string fname);
 
     std::map<std::string, std::map<std::string, std::string>> data;
-
+    std::map<std::string, std::string> get_subdata(std::string header);
     std::string to_string();
 
 private:
@@ -26,9 +26,15 @@ typedef std::shared_ptr<class SpecialConfig> SpecialConfigParser_ptr;
 class SpecialConfig
 {
 public:
-    std::map<std::string, std::string> get_subdata(ConfigParser_ptr _config, std::string header);
+    template <class T>
+    T get_value(const std::string _str);
+    std::string to_string();
+
+protected:
+    std::map<std::string, std::string> data;
+
+private:
     std::set<std::string> split_string(std::string str);
-    bool to_bool(std::string str);
 };
 
 #endif // CONFIGPARSER_H

@@ -13,9 +13,9 @@
  */
 void Gene::mutate()
 {
-    for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
+    for (std::pair<const std::string, Attribute_ptr> &at : attributes)
     {
-        it->second->mutate_value();
+        at.second->mutate_value();
     }
 }
 /**
@@ -185,7 +185,7 @@ NodeGene::NodeGene(int _key, std::vector<Attribute_ptr> _attributes)
  * @param other
  * @return float
  */
-float NodeGene::distance(NodeGene_ptr &other)
+float NodeGene::distance(NodeGene_ptr &other, float compatability_weight)
 {
     // Get Values of Each Attribute
     float bias = attributes["bias"]->get_float_value();
@@ -199,10 +199,10 @@ float NodeGene::distance(NodeGene_ptr &other)
     std::string aggregation_other = other->attributes["aggregation"]->get_string_value();
 
     // Calculate Distance between the
-    float dist = std::abs(bias - bias_other) + std::abs(response - response_other);
-    dist += (activation == activation_other ? 0 : 1);
-    dist += (aggregation == aggregation_other ? 0 : 1);
-    return dist;
+    float dist = std::fabs(bias - bias_other) + std::fabs(response - response_other);
+    dist += (activation.compare(activation_other) ? 1.0F : 0.0F);
+    dist += (aggregation.compare(aggregation_other) ? 1.0F : 0.0F);
+    return dist * compatability_weight;
 }
 /**
  * @brief Creates a pointer to a new copy of this NodeGene
@@ -243,12 +243,12 @@ NodeGene_ptr NodeGene::crossover(NodeGene_ptr &gene2)
         {
             if (rand_bool(0.5))
             {
-                std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
+                // std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
                 new_attr = gene2->attributes[it->first]->copy();
             }
             else
             {
-                std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
+                // std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
                 new_attr = (it->second)->copy();
             }
             attributes_copy.push_back(new_attr);
@@ -331,19 +331,19 @@ ConnectionGene::ConnectionGene(std::pair<int, int> _key, std::vector<Attribute_p
  * @param other
  * @return float
  */
-float ConnectionGene::distance(ConnectionGene_ptr &other)
+float ConnectionGene::distance(ConnectionGene_ptr &other, float compatability_weight)
 {
     float weight = attributes["weight"]->get_float_value();
     float other_weight = other->attributes["weight"]->get_float_value();
 
-    float dist = std::abs(weight - other_weight);
+    float dist = std::fabs(weight - other_weight);
 
     if (attributes["enable"]->get_bool_value() xor other->attributes["enable"]->get_bool_value())
     {
         dist += 1.0F;
     }
 
-    return dist;
+    return dist * compatability_weight;
 }
 /**
  * @brief Creates a pointer to a new copy of this ConnectionGene
@@ -385,12 +385,12 @@ ConnectionGene_ptr ConnectionGene::crossover(ConnectionGene_ptr &gene2)
         {
             if (rand_bool(0.5))
             {
-                std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
+                // std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
                 new_attr = gene2->attributes[it->first]->copy();
             }
             else
             {
-                std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
+                // std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
                 new_attr = (it->second)->copy();
             }
             attributes_copy.push_back(new_attr);
