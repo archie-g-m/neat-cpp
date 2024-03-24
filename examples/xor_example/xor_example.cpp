@@ -2,8 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <chrono>
-#include "population.h"
-#include "config_parser.h"
+#include "neat.h"
 
 // 2-input XOR inputs and expected outputs.
 std::vector<std::vector<float>> xor_inputs = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
