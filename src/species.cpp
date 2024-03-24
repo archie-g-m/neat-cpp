@@ -106,6 +106,7 @@ void SpeciesSet::speciate(std::map<int, Genome_ptr> &population, int generation)
         const int sid = sit.first;
         Species_ptr &s = sit.second;
         std::vector<std::pair<int, float>> candidates = {};
+        candidates.reserve(unspeciated_ids.size());
         for (int gid : unspeciated_ids)
         {
             Genome_ptr g = population[gid];
@@ -133,6 +134,7 @@ void SpeciesSet::speciate(std::map<int, Genome_ptr> &population, int generation)
         Genome_ptr g = population[gid];
 
         std::vector<std::pair<int, float>> candidates = {};
+        candidates.reserve(new_representatives.size());
         if (new_representatives.size())
         {
             for (std::pair<const int, int> &new_rep_pair : new_representatives)

@@ -40,7 +40,7 @@ class Population
 #ifdef TEST_MODE
 public:
 #else
-public:
+private:
 #endif
     ConfigParser_ptr raw_config;
     PopulationConfig_ptr config;

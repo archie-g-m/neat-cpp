@@ -118,7 +118,7 @@ public:
 private:
     NodeGene_ptr new_node(int node_key);
     ConnectionGene_ptr new_connection(std::pair<int, int> connection_key);
-    std::vector<std::pair<int, int>> generate_full_connections(bool direct);
+    void generate_full_connections(bool direct, std::vector<std::pair<int, int>> &connections);
     void generate_node_inputs();
     void mutate_add_node();
     void mutate_delete_node();

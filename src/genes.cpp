@@ -212,6 +212,7 @@ float NodeGene::distance(NodeGene_ptr &other, float compatability_weight)
 NodeGene_ptr NodeGene::copy()
 {
     std::vector<Attribute_ptr> attributes_copy;
+    attributes_copy.reserve(attributes.size());
     for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         Attribute_ptr new_attr = (it->second)->copy();
@@ -234,6 +235,7 @@ NodeGene_ptr NodeGene::crossover(NodeGene_ptr &gene2)
     }
 
     std::vector<Attribute_ptr> attributes_copy;
+    attributes_copy.reserve(std::max(attributes.size(), gene2->attributes.size()));
     // Find all
     for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
@@ -243,12 +245,10 @@ NodeGene_ptr NodeGene::crossover(NodeGene_ptr &gene2)
         {
             if (rand_bool(0.5))
             {
-                // std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
                 new_attr = gene2->attributes[it->first]->copy();
             }
             else
             {
-                // std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
                 new_attr = (it->second)->copy();
             }
             attributes_copy.push_back(new_attr);
@@ -277,25 +277,19 @@ std::string NodeGene::to_string()
 void NodeGene::verify_attributes()
 {
     // Check whether FloatAttribute/IntAttribute 'Bias' is in Gene
-    std::vector<std::string> bias_types;
-    bias_types.push_back("FloatAttribute");
-    bias_types.push_back("IntAttribute");
+    std::vector<std::string> bias_types = {"FloatAttribute", "IntAttribute"};
     verify_ind_attribute("bias", bias_types);
 
     // Check whether FloatAttribute/IntAttribute 'Response' is in Gene
-    std::vector<std::string> resp_types;
-    resp_types.push_back("FloatAttribute");
-    resp_types.push_back("IntAttribute");
+    std::vector<std::string> resp_types = {"FloatAttribute", "IntAttribute"};
     verify_ind_attribute("response", resp_types);
 
     // Check whether StringAttribute 'Activation' is in Gene
-    std::vector<std::string> act_types;
-    act_types.push_back("StringAttribute");
+    std::vector<std::string> act_types = {"StringAttribute"};
     verify_ind_attribute("activation", act_types);
 
     // Check whether StringAttribute 'Aggregation' is in Gene
-    std::vector<std::string> agg_types;
-    agg_types.push_back("StringAttribute");
+    std::vector<std::string> agg_types = {"StringAttribute"};
     verify_ind_attribute("aggregation", agg_types);
 
     for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
@@ -353,6 +347,7 @@ float ConnectionGene::distance(ConnectionGene_ptr &other, float compatability_we
 ConnectionGene_ptr ConnectionGene::copy()
 {
     std::vector<Attribute_ptr> attributes_copy;
+    attributes_copy.reserve(attributes.size());
     for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         Attribute_ptr new_attr = (it->second)->copy();
@@ -377,6 +372,7 @@ ConnectionGene_ptr ConnectionGene::crossover(ConnectionGene_ptr &gene2)
     }
 
     std::vector<Attribute_ptr> attributes_copy;
+    attributes_copy.reserve(std::max(attributes_copy.size(), gene2->attributes.size()));
     for (std::map<std::string, Attribute_ptr>::iterator it = attributes.begin(); it != attributes.end(); it++)
     {
         Attribute_ptr new_attr;
@@ -385,12 +381,10 @@ ConnectionGene_ptr ConnectionGene::crossover(ConnectionGene_ptr &gene2)
         {
             if (rand_bool(0.5))
             {
-                // std::cout << "Using Other Attribute in Crossover: " << gene2->attributes[it->first]->to_string() << std::endl;
                 new_attr = gene2->attributes[it->first]->copy();
             }
             else
             {
-                // std::cout << "Using Original Attribute in Crossover: " << (it->second)->to_string() << std::endl;
                 new_attr = (it->second)->copy();
             }
             attributes_copy.push_back(new_attr);
@@ -420,9 +414,7 @@ std::string ConnectionGene::to_string()
 void ConnectionGene::verify_attributes()
 {
     // Check whether FloatAttribute/IntAttribute 'weight' is in Gene
-    std::vector<std::string> weight_types;
-    weight_types.push_back("FloatAttribute");
-    weight_types.push_back("IntAttribute");
+    std::vector<std::string> weight_types = {"FloatAttribute", "IntAttribute"};
     verify_ind_attribute("weight", weight_types);
 
     // Check whether BoolAttribute 'enables' is in Gene

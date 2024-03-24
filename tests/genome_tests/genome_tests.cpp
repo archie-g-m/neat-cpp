@@ -32,7 +32,7 @@ TEST(GENOMETEST, ConstructionTestFullIndirect)
     ASSERT_EQ(genome->get_num_nodes(), 16);
 
     // Make sure correct number of connections were made
-    int calc_num_nodes = (2 * 4) + (4 * 10);
+    int calc_num_nodes = (2 * 10) + (10 * 4);
     ASSERT_EQ(genome->get_num_connections(), calc_num_nodes);
 }
 TEST(GENOMETEST, ConstructionTestFullDirectNoHidden)
@@ -146,17 +146,16 @@ TEST(GENOMETEST, ConstructionTest)
 
     int gid = 0;
     Genome_ptr genome = std::make_shared<Genome>(gid, config);
+}
 
-    std::cout << "Key: " << genome->key << std::endl;
-    std::cout << "Fitness: " << genome->fitness << std::endl;
-    std::cout << "Nodes:" << std::endl;
-    for (std::pair<const int, NodeGene_ptr> &ngit : genome->nodes)
-    {
-        const int nid = ngit.first;
-        NodeGene_ptr n = ngit.second;
-        std::cout << "\t" << nid << " DefaultNodeGene(key=" << n->key << ", bias=" << n->get_attribute("bias")->get_string_value() << ", response=" << n->get_attribute("response")->get_string_value() << ", activation=" << n->get_attribute("activation")->get_string_value() << ", aggregation=" << n->get_attribute("aggregation")->get_string_value()
-                  << ")" << std::endl;
-    }
+TEST(GENOMETEST, GenomeActivationTest)
+{
+    ConfigParser_ptr config = std::make_shared<ConfigParser>("config/GenomeActivateConfig.cfg");
+    Genome_ptr g = std::make_shared<Genome>(0, config);
+
+    std::vector<float> input = {1.0, 2.0};
+    g->activate();
+    std::vector<float> output = g->forward(input);
 }
 
 int main(int argc, char **argv)

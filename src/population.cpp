@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <iostream>
+#include <chrono>
 
 PopulationConfig::PopulationConfig(ConfigParser_ptr _config)
 {
@@ -52,11 +53,16 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
 {
     float best_fitness = std::numeric_limits<float>::min();
     Genome_ptr best;
-    for (int gen = 0; gen != n; gen++)
+    int64_t time_acc = 0;
+    int gen = 0;
+    for (; gen != n; gen++)
     {
+        // Start the clock
+        auto start = std::chrono::steady_clock::now();
         // Run fitness function on each genome
         float gen_best_fitness = std::numeric_limits<float>::min();
-        std::vector<float> fitnesses = {};
+        std::vector<float> fitnesses;
+        fitnesses.reserve(population.size());
         Genome_ptr gen_best;
 
         for (std::pair<const int, Genome_ptr> git : population)
@@ -69,13 +75,14 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
             if (g->fitness > gen_best_fitness)
             {
                 gen_best_fitness = g->fitness;
-                best = g;
+                gen_best = g;
             }
             fitnesses.push_back(g->fitness);
         }
 
         if (gen_best_fitness > best_fitness)
         {
+            std::cout << "New Best Genome: " << gen_best->key << " Fitness = " << best_fitness << std::endl;
             best_fitness = gen_best_fitness;
             best = gen_best;
         }
@@ -108,45 +115,25 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
 
         // Speciate the updated
         species_set->speciate(population, gen);
-        std::vector<float> distances = {};
-        for (std::pair<const int, Genome_ptr> git1 : population)
-        {
-            const int gid1 = git1.first;
-            Genome_ptr g1 = git1.second;
-            for (std::pair<const int, Genome_ptr> git2 : population)
-            {
-                const int gid2 = git2.first;
-                Genome_ptr g2 = git2.second;
-                if (gid1 != gid2)
-                {
-                    distances.push_back(g1->distance(g2));
-                }
-            }
-        }
 
-        float sum = std::accumulate(distances.begin(), distances.end(), 0.0);
-        float mean = sum / distances.size();
-
-        std::vector<float> diff(distances.size());
-        std::transform(distances.begin(), distances.end(), diff.begin(), [mean](float x)
-                       { return x - mean; });
-
-        float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-        float stdev = std::sqrt(sq_sum / distances.size());
-
-        std::cout << "Generation: " << gen << std::endl;
-        std::cout << "  Population of " << population.size() << " in " << species_set->species.size() << " species:" << std::endl;
-        std::cout << "  Mean genetic distance " << mean << ", standard deviation " << stdev << std::endl;
-        std::cout << "  ID\tage\tsize\tfitness\tstag" << std::endl;
-        std::cout << "  ==\t===\t====\t=======\t====" << std::endl;
-        for (std::pair<const int, Species_ptr> sit : species_set->species)
-        {
-            const int sid = sit.first;
-            Species_ptr s = sit.second;
-            std::cout << "  " << sid << "\t" << gen - s->generation_created << "\t" << s->members.size() << "\t" << s->fitness << "\t" << gen - s->generation_last_improved << "\t" << std::endl;
-        }
+        auto end = std::chrono::steady_clock::now();
+        // Calculate the elapsed time in milliseconds
+        int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        time_acc += duration;
+        // std::cout << "Generation: " << gen << std::endl;
+        // std::cout << "  Population of " << population.size() << " in " << species_set->species.size() << " species:" << std::endl;
+        // std::cout << "  ID\tage\tsize\tfitness\tstag" << std::endl;
+        // std::cout << "  ==\t===\t====\t=======\t====" << std::endl;
+        // for (std::pair<const int, Species_ptr> sit : species_set->species)
+        // {
+        //     const int sid = sit.first;
+        //     Species_ptr s = sit.second;
+        //     std::cout << "  " << sid << "\t" << gen - s->generation_created << "\t" << s->members.size() << "\t" << s->fitness << "\t" << gen - s->generation_last_improved << "\t" << std::endl;
+        // }
+        // std::cout << "Execution Time: " << duration << "ms" << std::endl;
+        // std::cout << std::endl;
     }
-
+    std::cout << "Average Execution Time: " << time_acc / gen << "ms" << std::endl;
     return best;
 }
 
@@ -172,7 +159,7 @@ std::map<int, Genome_ptr> Population::new_population(ConfigParser_ptr _config, i
 
 /**
  * @brief Find all stagnant species based upon their current member's fitnesses
- * 
+ *
  * @param generation current generation
  * @return std::vector<int> Vector of species ID's that are stagnant
  */
@@ -188,52 +175,52 @@ std::vector<int> Population::get_stagnant_species(int generation)
         float prev_fitness = s->fitness_history.size() ? *std::max_element(s->fitness_history.begin(), s->fitness_history.end()) : -std::numeric_limits<float>::max();
         s->fitness = aggregate_vector(s->get_fitnesses(), config->species_fitness_func);
         s->fitness_history.push_back(s->fitness);
-        // std::cout << "Species: " << sid << " pf: " << prev_fitness << " fit: " << s->fitness << " gen: " << generation << std::endl;
         if (s->fitness > prev_fitness)
         {
-            // std::cout << "Species " << sid << " improved on Generation " << generation << std::endl;
             s->generation_last_improved = generation;
         }
         species_data.emplace_back(sid, s);
     }
 
     // 2. Sort species by their fitness
-    std::sort(species_data.begin(),
-              species_data.end(),
-              [](std::pair<int, Species_ptr> &s1, std::pair<int, Species_ptr> &s2)
-              { return s1.second->fitness == s2.second->fitness ? s1.first < s2.first : s1.second->fitness < s2.second->fitness; });
-
-    // for (const std::pair<int, Species_ptr> &sit : species_data)
-    // {
-    //     std::cout << sit.first << ": Fitness = " << sit.second->fitness << std::endl;
-    // }
-    // 3. Mark species to be removed by their time since they were last improved
-    int num_active = species_data.size();
-    int it = 0;
     std::vector<int> stagnant_sid = {};
-    for (std::pair<int, Species_ptr> &sit : species_data)
+    int extra_species = species_set->species.size() - config->species_elitism;
+    if (extra_species > 0)
     {
-        const int sid = sit.first;
-        Species_ptr s = sit.second;
-        int stagnant_time = generation - s->generation_last_improved;
-        bool is_stagnant = false;
-        if (num_active > config->species_elitism)
-        {
-            is_stagnant = (stagnant_time >= config->max_stagnation);
-        }
 
-        if ((species_data.size() - it) <= config->species_elitism)
-        {
-            is_stagnant = false;
-        }
+        std::sort(species_data.begin(),
+                  species_data.end(),
+                  [](std::pair<int, Species_ptr> &s1, std::pair<int, Species_ptr> &s2)
+                  { return s1.second->fitness == s2.second->fitness ? s1.first < s2.first : s1.second->fitness < s2.second->fitness; });
 
-        if (is_stagnant)
+        // 3. Mark species to be removed by their time since they were last improved
+        int num_active = species_data.size();
+        int it = 0;
+        stagnant_sid.reserve(extra_species);
+        for (std::pair<int, Species_ptr> &sit : species_data)
         {
-            num_active -= 1;
-            stagnant_sid.push_back(sid);
-        }
+            const int sid = sit.first;
+            Species_ptr s = sit.second;
+            int stagnant_time = generation - s->generation_last_improved;
+            bool is_stagnant = false;
+            if (num_active > config->species_elitism)
+            {
+                is_stagnant = (stagnant_time >= config->max_stagnation);
+            }
 
-        it++;
+            if ((species_data.size() - it) <= config->species_elitism)
+            {
+                is_stagnant = false;
+            }
+
+            if (is_stagnant)
+            {
+                num_active -= 1;
+                stagnant_sid.push_back(sid);
+            }
+
+            it++;
+        }
     }
 
     return stagnant_sid;
@@ -241,7 +228,7 @@ std::vector<int> Population::get_stagnant_species(int generation)
 
 /**
  * @brief Calculate the number of spawns that each species needs based upon their normalized fitnesses and previous sizes
- * 
+ *
  * @param adj_fitnesses map of species ids to adjusted fitnesses
  * @param prev_sizes map of species ids to their previous sizes
  * @return std::map<int, int> map of species ids to the desired new sizes
@@ -307,7 +294,7 @@ std::map<int, int> Population::calc_spawns(std::map<int, float> adj_fitnesses, s
 
 /**
  * @brief Reproduce the current population based on their current fitnesses and the provieded generation
- * 
+ *
  * @param generation current generation
  * @return std::map<int, Genome_ptr> map of new population
  */

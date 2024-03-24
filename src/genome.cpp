@@ -122,11 +122,11 @@ Genome::Genome(int _key, ConfigParser_ptr _config)
     std::vector<std::pair<int, int>> connection_list;
     if (config->initial_connection == "full_direct")
     {
-        connection_list = generate_full_connections(true);
+        generate_full_connections(true, connection_list);
     }
     else if (config->initial_connection == "full_indirect")
     {
-        connection_list = generate_full_connections(false);
+        generate_full_connections(false, connection_list);
     }
     else
     {
@@ -296,11 +296,8 @@ NodeGene_ptr Genome::new_node(int node_key)
     StringAttribute_ptr aggregation = std::make_shared<StringAttribute>(aggregation_key,
                                                                         config->aggregation_mutate_rate,
                                                                         config->aggregation_options);
-    std::vector<Attribute_ptr> node_attributes;
-    node_attributes.push_back(bias);
-    node_attributes.push_back(response);
-    node_attributes.push_back(activation);
-    node_attributes.push_back(aggregation);
+    std::vector<Attribute_ptr> node_attributes = {bias, response, activation, aggregation};
+
     NodeGene_ptr node = std::make_shared<NodeGene>(node_key, node_attributes);
     return node;
 }
@@ -327,13 +324,12 @@ ConnectionGene_ptr Genome::new_connection(std::pair<int, int> connection_key)
                                                                config->enabled_default,
                                                                config->enabled_mutate_rate);
 
-    std::vector<Attribute_ptr> connection_attributes;
-    connection_attributes.push_back(weight);
-    connection_attributes.push_back(enable);
+    std::vector<Attribute_ptr> connection_attributes = {weight, enable};
 
     ConnectionGene_ptr conneciton = std::make_shared<ConnectionGene>(connection_key, connection_attributes);
     return conneciton;
 }
+
 /**
  * @brief generates the full set of connections.
  *        if direct is true then connections will be generated from:
@@ -345,15 +341,20 @@ ConnectionGene_ptr Genome::new_connection(std::pair<int, int> connection_key)
  *          - hidden -> outputs
  *
  * @param direct
- * @return std::vector<std::pair<int,int>>
+ * @param connections
  */
-std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
+void Genome::generate_full_connections(bool direct, std::vector<std::pair<int, int>> &connections)
 {
     // TODO This can probably be optimized more
     // currently O(inputs*(hidden+outputs) + hidden*outputs)
-    std::vector<std::pair<int, int>> connections;
+    int num_inputs = get_num_inputs();
+    int num_hidden = get_num_hidden();
+    int num_outputs = get_num_outputs();
+    connections.clear();
     if (direct || hidden_keys.empty())
     {
+        int num_connections = num_inputs * (num_hidden + num_outputs) + num_hidden * num_outputs;
+        connections.reserve(num_connections);
         for (int in_key : input_keys)
         {
             // inputs -> hidden (if possible)
@@ -393,14 +394,16 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
     }
     else
     {
-        // inputs -> outputs
+        int num_connections = num_inputs * num_hidden + num_hidden * num_outputs;
+        connections.reserve(num_connections);
+        // inputs -> hidden
         for (int in_key : input_keys)
         {
-            for (int ou_key : output_keys)
+            for (int hd_key : hidden_keys)
             {
                 std::pair<int, int> conn_key;
                 conn_key.first = in_key;
-                conn_key.second = ou_key;
+                conn_key.second = hd_key;
                 connections.push_back(conn_key);
             }
         }
@@ -416,7 +419,6 @@ std::vector<std::pair<int, int>> Genome::generate_full_connections(bool direct)
             }
         }
     }
-    return connections;
 }
 /**
  * @brief finds the inputs to each node in the network
@@ -529,12 +531,15 @@ void Genome::mutate_delete_node()
     auto node_key = hidden_keys.cbegin();
     std::advance(node_key, rand() % get_num_hidden());
     int node_to_remove = *node_key;
+
     // remove the node from the node map
     nodes.erase(node_to_remove); // delete the key and pointer from map
     hidden_keys.erase(node_to_remove);
     node_inputs_map.erase(node_to_remove);
+
     // remove all connections to the node from the connection key
     std::vector<std::pair<int, int>> conns_to_remove = {}; // store all the keys before erasing them from the map
+    conns_to_remove.reserve(nodes.size());                 // a node can at most be connected to every other node
     for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &it : connections)
     {
         std::pair<int, int> key = it.first;
@@ -780,12 +785,8 @@ float Genome::distance(Genome_ptr &other)
                 node_distance += n1.second->distance(n2, config->compatibility_weight_coefficient);
             }
         }
-        // std::cout << "Node Distance Before = " << node_distance << std::endl;
-        // std::cout << "Disjoint Nodes = " << disjoint_nodes << std::endl;
         float max_nodes = fmax(nodes.size(), other->nodes.size());
         node_distance = (node_distance + (config->compatibility_disjoint_coefficient * disjoint_nodes)) / max_nodes;
-
-        // std::cout << "Node Distance After = " << node_distance << std::endl;
     }
 
     // Compute node gene distance component.
@@ -814,12 +815,9 @@ float Genome::distance(Genome_ptr &other)
                 connection_distance += c1.second->distance(c2, config->compatibility_weight_coefficient);
             }
         }
-        // std::cout << "Connection Distance Before = " << connection_distance << std::endl;
 
         float max_connections = fmax(connections.size(), other->connections.size());
         connection_distance = (connection_distance + (config->compatibility_disjoint_coefficient * disjoint_connections)) / max_connections;
-
-        // std::cout << "Connection Distance After = " << connection_distance << std::endl;
     }
 
     float distance = std::fabs(node_distance + connection_distance);
@@ -852,6 +850,7 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
     float node_value;
     for (int node_key : forward_order)
     {
+
         NodeGene_ptr this_node = nodes[node_key];
         float bias = this_node->get_attribute("bias")->get_float_value();
         float response = this_node->get_attribute("response")->get_float_value();
@@ -866,16 +865,19 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
             std::vector<float> agg_vec;
             for (int node_input_id : node_inputs)
             {
-                agg_vec.push_back(input_values[node_input_id]);
+                std::pair<int, int> con(node_input_id, node_key);
+                float w = connections[con]->get_attribute("weight")->get_float_value();
+                agg_vec.push_back(input_values[node_input_id] * w);
             }
             node_value = aggregate_vector(agg_vec, aggregation_method);
+            // Apply activation function to the value
+            node_value = activate_value((bias + (response * node_value)), activation_method);
         }
         else
         {
             node_value = inputs[std::distance(input_keys.begin(), input_ind)];
         }
-        // Apply activation function to the value
-        node_value = activate_value((bias + (response * node_value)), activation_method);
+
         input_values[node_key] = node_value;
     }
     std::vector<float> outputs;
