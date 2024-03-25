@@ -52,7 +52,7 @@ Population::Population(ConfigParser_ptr _config)
  */
 Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, int n, int verbose_level)
 {
-    float best_fitness = std::numeric_limits<float>::min();
+    float best_fitness = -std::numeric_limits<float>::max();
     Genome_ptr best;
     int64_t time_acc = 0;
     int gen = 0;
@@ -61,7 +61,7 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
         // Start the clock
         auto start = std::chrono::steady_clock::now();
         // Run fitness function on each genome
-        float gen_best_fitness = std::numeric_limits<float>::min();
+        float gen_best_fitness = -std::numeric_limits<float>::max();
         std::vector<float> fitnesses;
         fitnesses.reserve(population.size());
         Genome_ptr gen_best;
@@ -87,8 +87,8 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
             {
                 std::cout << "New Best Genome: " << gen_best->key << " Fitness = " << best_fitness << std::endl;
             }
-            best_fitness = gen_best_fitness;
             best = gen_best;
+            best_fitness = gen_best_fitness;
         }
 
         if (!config->no_fitness_termination)
