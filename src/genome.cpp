@@ -839,10 +839,10 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
 
     if (inputs.size() != input_keys.size())
     {
-        throw std::invalid_argument("Incorrect number of keys provided, given: " +
-                                    std::to_string(input_keys.size()) +
+        throw std::invalid_argument("Incorrect number of inputs provided, given: " +
+                                    std::to_string(inputs.size()) +
                                     ", need: " +
-                                    std::to_string(inputs.size()));
+                                    std::to_string(input_keys.size()));
     }
 
     std::map<int, float> input_values;
@@ -888,4 +888,32 @@ std::vector<float> Genome::forward(std::vector<float> inputs)
     }
 
     return outputs;
+}
+
+/**
+ * @brief Returns a formatted string of this Genome's Data
+ *
+ * @return std::string
+ */
+std::string Genome::to_string()
+{
+    std::string out = "";
+    out += "Genome: " + std::to_string(key) + "\n";
+    out += "  Fitness: " + std::to_string(fitness) + "\n";
+    out += "  Nodes:\n";
+    for (std::pair<const int, NodeGene_ptr> &ngit : nodes)
+    {
+        const int nid = ngit.first;
+        NodeGene_ptr n = ngit.second;
+        out += "    " + std::to_string(nid) + " DefaultNodeGene(key=" + std::to_string(n->key) + ", bias=" + n->get_attribute("bias")->get_string_value() + ", response=" + n->get_attribute("response")->get_string_value() + ", activation=" + n->get_attribute("activation")->get_string_value() + ", aggregation=" + n->get_attribute("aggregation")->get_string_value() + ")\n";
+    }
+    out += "  Connections:\n";
+    for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &cgit : connections)
+    {
+        const std::pair<int, int> cid = cgit.first;
+        ConnectionGene_ptr n = cgit.second;
+        out += "    (" + std::to_string(cid.first) + ", " + std::to_string(cid.second) + ") DefaultConnectionGene(key=(" + std::to_string(n->key.first) + ", " + std::to_string(n->key.second) + "), weight=" + n->get_attribute("weight")->get_string_value() + ", enable=" + n->get_attribute("enable")->get_string_value() + ")\n";
+    }
+
+    return out;
 }

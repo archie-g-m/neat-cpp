@@ -115,6 +115,8 @@ public:
     float distance(Genome_ptr &other);
     std::vector<float> forward(std::vector<float> inputs);
 
+    std::string to_string();
+
 private:
     NodeGene_ptr new_node(int node_key);
     ConnectionGene_ptr new_connection(std::pair<int, int> connection_key);

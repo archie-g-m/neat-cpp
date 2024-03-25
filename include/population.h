@@ -50,7 +50,7 @@ private:
 
 public:
     Population(ConfigParser_ptr _config);
-    Genome_ptr run(std::function<float(Genome_ptr)> fitness_function, int n = -1);
+    Genome_ptr run(std::function<float(Genome_ptr)> fitness_function, int n = -1, int verbose_level = 3);
 
 #ifdef TEST_MODE
 public:

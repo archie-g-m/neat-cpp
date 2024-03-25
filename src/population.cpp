@@ -47,9 +47,10 @@ Population::Population(ConfigParser_ptr _config)
  *
  * @param fitness_function fitness function to run genomes against
  * @param n Number of generations to run the experiment for
+ * @param verbose_level Level of verbosity (0=None, 1=Generation Numbers & Exit Criteria, 2=Timing, 3=Detailed Species Info)
  * @return Genome_ptr Best Genome found
  */
-Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, int n)
+Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, int n, int verbose_level)
 {
     float best_fitness = std::numeric_limits<float>::min();
     Genome_ptr best;
@@ -82,7 +83,10 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
 
         if (gen_best_fitness > best_fitness)
         {
-            std::cout << "New Best Genome: " << gen_best->key << " Fitness = " << best_fitness << std::endl;
+            if (verbose_level >= 3)
+            {
+                std::cout << "New Best Genome: " << gen_best->key << " Fitness = " << best_fitness << std::endl;
+            }
             best_fitness = gen_best_fitness;
             best = gen_best;
         }
@@ -92,7 +96,10 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
             float fitness_value = aggregate_vector(fitnesses, config->fitness_criterion);
             if (fitness_value >= config->fitness_threshold)
             {
-                std::cout << "Fitness Criterion Reached!!" << std::endl;
+                if (verbose_level)
+                {
+                    std::cout << "Fitness Criterion Reached!!" << std::endl;
+                }
                 break;
             }
         }
@@ -108,7 +115,10 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
             else
             {
                 // TODO: Log extinction
-                std::cout << "No more species, ending" << std::endl;
+                if (verbose_level)
+                {
+                    std::cout << "No more species, ending" << std::endl;
+                }
                 break;
             }
         }
@@ -120,18 +130,30 @@ Genome_ptr Population::run(std::function<float(Genome_ptr)> fitness_function, in
         // Calculate the elapsed time in milliseconds
         int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         time_acc += duration;
-        // std::cout << "Generation: " << gen << std::endl;
-        // std::cout << "  Population of " << population.size() << " in " << species_set->species.size() << " species:" << std::endl;
-        // std::cout << "  ID\tage\tsize\tfitness\tstag" << std::endl;
-        // std::cout << "  ==\t===\t====\t=======\t====" << std::endl;
-        // for (std::pair<const int, Species_ptr> sit : species_set->species)
-        // {
-        //     const int sid = sit.first;
-        //     Species_ptr s = sit.second;
-        //     std::cout << "  " << sid << "\t" << gen - s->generation_created << "\t" << s->members.size() << "\t" << s->fitness << "\t" << gen - s->generation_last_improved << "\t" << std::endl;
-        // }
-        // std::cout << "Execution Time: " << duration << "ms" << std::endl;
-        // std::cout << std::endl;
+        if (verbose_level)
+        {
+            std::cout << "Generation: " << gen << std::endl;
+        }
+        if (verbose_level >= 3)
+        {
+            std::cout << "  Population of " << population.size() << " in " << species_set->species.size() << " species:" << std::endl;
+            std::cout << "  ID\tage\tsize\tfitness\tstag" << std::endl;
+            std::cout << "  ==\t===\t====\t=======\t====" << std::endl;
+            for (std::pair<const int, Species_ptr> sit : species_set->species)
+            {
+                const int sid = sit.first;
+                Species_ptr s = sit.second;
+                std::cout << "  " << sid << "\t" << gen - s->generation_created << "\t" << s->members.size() << "\t" << s->fitness << "\t" << gen - s->generation_last_improved << "\t" << std::endl;
+            }
+        }
+        if (verbose_level >= 2)
+        {
+            std::cout << "Execution Time: " << duration << "ms" << std::endl;
+        }
+        if (verbose_level)
+        {
+            std::cout << std::endl;
+        }
     }
     std::cout << "Average Execution Time: " << time_acc / gen << "ms" << std::endl;
     return best;
