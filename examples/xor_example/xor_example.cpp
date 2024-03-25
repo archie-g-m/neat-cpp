@@ -32,29 +32,11 @@ void run(const std::string &config_file)
     Population p(config);
 
     // Run for up to 300 generations.
-    Genome_ptr best_genome = p.run(eval_genomes, 300);
+    Genome_ptr best_genome = p.run(eval_genomes, 300, 0);
 
     // Display the winning genome.
     std::cout << "\nBest genome:\n"
-              << best_genome->key << std::endl;
-    std::cout << "Fitness:\n"
-              << best_genome->fitness << std::endl;
-    std::cout << "Nodes:" << std::endl;
-    for (std::pair<const int, NodeGene_ptr> &ngit : best_genome->nodes)
-    {
-        const int nid = ngit.first;
-        NodeGene_ptr n = ngit.second;
-        std::cout << "\t" << nid << " DefaultNodeGene(key=" << n->key << ", bias=" << n->get_attribute("bias")->get_string_value() << ", response=" << n->get_attribute("response")->get_string_value() << ", activation=" << n->get_attribute("activation")->get_string_value() << ", aggregation=" << n->get_attribute("aggregation")->get_string_value()
-                  << ")" << std::endl;
-    }
-    std::cout << "Connections:" << std::endl;
-    for (std::pair<const std::pair<int, int>, ConnectionGene_ptr> &cgit : best_genome->connections)
-    {
-        const std::pair<int, int> cid = cgit.first;
-        ConnectionGene_ptr n = cgit.second;
-        std::cout << "\t(" << cid.first << ", " << cid.second << ") DefaultConnectionGene(key=(" << n->key.first << ", " << n->key.second << "), weight=" << n->get_attribute("weight")->get_string_value() << ", enable=" << n->get_attribute("enable")->get_string_value()
-                  << ")" << std::endl;
-    }
+              << best_genome->to_string() << std::endl;
 
     // Show output of the most fit genome against training data.
     std::cout << "\nOutput:" << std::endl;
@@ -79,9 +61,6 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     std::string fname = argv[1];
 
-    ConfigParser_ptr config = std::make_shared<ConfigParser>(fname);
-
-    std::cout << config->to_string() << std::endl;
     run(fname);
     return 0;
 }
